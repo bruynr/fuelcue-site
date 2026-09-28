@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FuelCue · recordatorios de geles y avituallamiento para relojes Garmin</title>
+<meta name="description" content="FuelCue es un campo de datos gratuito de Garmin Connect IQ que te recuerda cuándo avituallarte mientras corres: tu propio plan de geles, Dextro y cafeína, por distancia o por tiempo.">
+<link rel="canonical" href="https://bruynr.github.io/fuelcue-site/es/">
+<link rel="alternate" hreflang="en" href="https://bruynr.github.io/fuelcue-site/">
+<link rel="alternate" hreflang="nl" href="https://bruynr.github.io/fuelcue-site/nl/">
+<link rel="alternate" hreflang="de" href="https://bruynr.github.io/fuelcue-site/de/">
+<link rel="alternate" hreflang="fr" href="https://bruynr.github.io/fuelcue-site/fr/">
+<link rel="alternate" hreflang="es" href="https://bruynr.github.io/fuelcue-site/es/">
+<link rel="alternate" hreflang="it" href="https://bruynr.github.io/fuelcue-site/it/">
+<link rel="alternate" hreflang="x-default" href="https://bruynr.github.io/fuelcue-site/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FuelCue">
+<meta property="og:title" content="FuelCue · tu plan de avituallamiento, a tiempo">
+<meta property="og:description" content="FuelCue es un campo de datos gratuito de Garmin Connect IQ que te recuerda cuándo avituallarte mientras corres: tu propio plan de geles, Dextro y cafeína, por distancia o por tiempo.">
+<meta property="og:url" content="https://bruynr.github.io/fuelcue-site/es/">
+<meta property="og:image" content="https://bruynr.github.io/fuelcue-site/img/og.png">
+<meta property="og:locale" content="es_ES">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#15171a">
+<link rel="icon" href="../img/icon.png">
+<link rel="stylesheet" href="../style.css">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "SoftwareApplication",
+ "name": "FuelCue",
+ "description": "FuelCue es un campo de datos gratuito de Garmin Connect IQ que te recuerda cuándo avituallarte mientras corres: tu propio plan de geles, Dextro y cafeína, por distancia o por tiempo.",
+ "url": "https://bruynr.github.io/fuelcue-site/es/",
+ "inLanguage": "es",
+ "applicationCategory": "SportsApplication",
+ "applicationSubCategory": "Garmin Connect IQ data field",
+ "operatingSystem": "Garmin Connect IQ 5.0+",
+ "isAccessibleForFree": true,
+ "offers": {
+  "@type": "Offer",
+  "price": "0",
+  "priceCurrency": "EUR"
+ },
+ "image": "https://bruynr.github.io/fuelcue-site/img/icon.png",
+ "screenshot": [
+  "https://bruynr.github.io/fuelcue-site/img/fr970-run.png",
+  "https://bruynr.github.io/fuelcue-site/img/fr970-alert.png",
+  "https://bruynr.github.io/fuelcue-site/img/fenix847mm-before.png"
+ ],
+ "availableLanguage": [
+  "English",
+  "Nederlands",
+  "Deutsch",
+  "Français",
+  "Español",
+  "Italiano"
+ ]
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "inLanguage": "es",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "¿Qué es FuelCue?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "FuelCue es un campo de datos gratuito para relojes Garmin (Connect IQ) que te recuerda cuándo tomar un gel u otro avituallamiento mientras corres. Creas tu propio plan por distancia o por tiempo, y FuelCue vibra, pita y muestra una alerta a pantalla completa justo antes de cada momento."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "¿Qué relojes Garmin son compatibles con FuelCue?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Todos los relojes Garmin redondos con Connect IQ 5.0 o superior, entre ellos Forerunner 165, 170, 255, 265, 570, 70, 955, 965 y 970, fēnix 7, 8, 9 y E, epix (Gen 2) y epix Pro, Enduro 3, MARQ (Gen 2), Venu 2, 3 y 4, y vívoactive 5 y 6."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "¿Puedo combinar distintos avituallamientos en un plan?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Sí. Cada paso tiene su propio nombre (por ejemplo Gel, Dextro o Gel CAF), sus propios gramos de carbohidratos y una marca opcional de cafeína. Los pasos se pueden repetir, y las repeticiones se numeran automáticamente."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "¿Puedo planificar por distancia o por tiempo?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Ambas. Cada plan es todo por distancia (km) o todo por tiempo (minutos), con pasos de 0,5 a 100 km o de 5 a 600 minutos."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "¿Por qué la alerta llega antes?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Por defecto la alerta llega 30 segundos o 50 metros antes del momento previsto, para que no coincida con la alerta de km o de vuelta de Garmin. Ajustable de 0 (justo en el momento) a 2 minutos o 200 metros."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "¿Tengo que pulsar un botón cuando tomo un gel?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "No. FuelCue es un recordatorio, no un registro. Guarda los carbohidratos previstos en tu actividad, como gráficos en Garmin Connect, sin pulsar botones que puedan alterar tu grabación."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "¿FuelCue es gratis?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Sí. FuelCue es gratis, sin suscripción, sin anuncios y sin cuenta. Se agradece un donativo por PayPal."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "¿En qué idiomas está FuelCue?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Inglés, neerlandés, alemán, francés, español e italiano, en el reloj y en los ajustes."
+   }
+  }
+ ]
+}
+</script>
+</head>
+<body>
+
+<header><div class="wrap">
+  <img src="../img/icon.png" alt=""><b>FuelCue</b>
+  <nav class="langs" aria-label="Language"><a href=".././" hreflang="en" lang="en">EN</a> <a href="../nl/" hreflang="nl" lang="nl">NL</a> <a href="../de/" hreflang="de" lang="de">DE</a> <a href="../fr/" hreflang="fr" lang="fr">FR</a> <a href="../es/" hreflang="es" lang="es" aria-current="page">ES</a> <a href="../it/" hreflang="it" lang="it">IT</a></nav>
+  <a class="btn ghost" href="https://paypal.me/rdbruijn">Donar</a>
+  <span class="btn soon">Connect IQ Store · pronto</span>
+</div></header>
+
+<main>
+<section class="alt"><div class="wrap split">
+  <div>
+    <div class="kicker">Campo de datos Garmin · gratis</div>
+    <h1>Tu plan de avituallamiento.<br><em>A tiempo.</em></h1>
+    <p class="lead">Gel, Dextro, cafeína: configura cada paso a tu manera. FuelCue vibra justo antes de tiempo, para que nunca más se te pase un gel.</p>
+    <div class="ctas">
+      <span class="btn soon">Pronto en la Connect IQ Store</span>
+      <a class="btn amber" href="https://paypal.me/rdbruijn">Invítame a un gel</a>
+    </div>
+  </div>
+  <img class="watch" src="../img/fr970-run.png" alt="FuelCue en un Forerunner 970: faltan 3,6 km para el próximo Gel CAF" width="612" height="822">
+</div></section>
+
+<section><div class="wrap split rev">
+  <div>
+    <div class="kicker">Tu plan</div>
+    <h2>Créalo como<br>un <em>entreno.</em></h2>
+    <p class="lead">Una secuencia de pasos por distancia o por tiempo, con repeticiones. Cada paso tiene su propio nombre, gramos y cafeína. Hasta 5 planes, a elegir en el reloj.</p>
+    <ul class="checks"><li>Por plan, todo por distancia (km) o todo por tiempo (min)</li><li>Las repeticiones se numeran solas: Gel #1, #2, #3</li><li>Un gel antes de la salida cuenta, sin alerta</li></ul>
+  </div>
+  <div class="card">
+    <h3>Maratón · distancia</h3>
+    <div class="row"><span class="at">0 km</span><span class="name">Gel</span><span class="g">25 g</span><span class="tag b">antes de salir</span></div>
+    <div class="row"><span class="at">7 km</span><span class="name">Gel</span><span class="g">25 g</span></div>
+    <div class="row"><span class="at">7 km</span><span class="name">Dextro</span><span class="g">15 g</span></div>
+    <div class="row"><span class="at">7 km</span><span class="name">Gel CAF</span><span class="g">25 g</span><span class="tag">cafeína</span></div>
+    <div class="row"><span class="at">2× 7 km</span><span class="name">Gel</span><span class="g">25 g</span><span class="tag b">#1 #2</span></div>
+  </div>
+</div></section>
+
+<section class="alt"><div class="wrap split">
+  <div>
+    <div class="kicker">La alerta</div>
+    <h2>Justo <em>antes</em><br>del momento.</h2>
+    <p class="lead">30 s o 50 m antes (ajustable), para que nunca coincida con tu alerta de km o de vuelta. Vibración, tono y pantalla completa con lo que toca tomar, el momento previsto y tu posición.</p>
+  </div>
+  <img class="watch" src="../img/fr970-alert.png" alt="Alerta: Dextro, 15 g, km 14, 3 de 6" width="612" height="822" loading="lazy">
+</div></section>
+
+<section><div class="wrap split rev">
+  <div>
+    <div class="kicker">De un vistazo</div>
+    <h2>Lo ves <em>venir.</em></h2>
+    <p class="lead">Un anillo de cuenta atrás, lo que viene, y tus carbohidratos hasta ahora y por hora. La cuenta atrás se vuelve ámbar en los últimos 500 m o el último minuto.</p>
+  </div>
+  <div class="pair">
+    <img src="../img/fenix847mm-run.png" alt="fēnix 8: faltan 3,6 km para Gel CAF" width="684" height="897" loading="lazy">
+    <img src="../img/fenix847mm-almost.png" alt="fēnix 8: faltan 0,4 km, en ámbar" width="684" height="897" loading="lazy">
+  </div>
+</div></section>
+
+<section class="alt"><div class="wrap" style="text-align: center;">
+  <div class="kicker">Cualquier diseño</div>
+  <h2>Completo, mitad o <em>una esquina.</em></h2>
+  <p class="lead" style="margin: 18px auto 44px;">FuelCue encaja en las pantallas de datos que ya usas.</p>
+  <div class="faces">
+    <div class="face"><div><img src="../img/fr970-run.png" alt="" loading="lazy"></div>Completo</div>
+    <div class="face"><div><img src="../img/fr970-half.png" alt="" loading="lazy"></div>Mitad</div>
+    <div class="face"><div><img src="../img/fr970-quarter.png" alt="" loading="lazy"></div>Cuarto</div>
+  </div>
+</div></section>
+
+<section><div class="wrap split">
+  <div>
+    <div class="kicker">Empieza</div>
+    <h2>Listo en <em>un minuto.</em></h2>
+    <ol class="steps"><li>Instala FuelCue desde la Connect IQ Store y añádelo a una pantalla de datos de tu perfil de carrera.</li><li>Activa <b>Alertas → Connect IQ</b> en los ajustes de la actividad.</li><li>Edita tus planes en la app Connect IQ: FuelCue → Ajustes. El plan 1 funciona desde el principio (6× 30 min Gel).</li><li>Elige un plan en el reloj: menú de actividad → campos Connect IQ → FuelCue.</li></ol>
+  </div>
+  <div>
+    <div class="kicker">Después de correr</div>
+    <h2>En <em>Garmin Connect.</em></h2>
+    <ul class="checks"><li>Gráficos: carbohidratos hasta ahora y por hora</li><li>Resumen: carbohidratos totales, tomas, tomas con cafeína y plan</li><li>Valores previstos: FuelCue te lo recuerda, nunca tienes que pulsar un botón</li></ul>
+  </div>
+</div></section>
+
+<section class="alt"><div class="wrap">
+  <div style="text-align: center;">
+    <div class="kicker">Preguntas frecuentes</div>
+    <h2>Bueno <em>saberlo.</em></h2>
+  </div>
+  <div class="faq">
+<details><summary>¿Qué es FuelCue?</summary><p>FuelCue es un campo de datos gratuito para relojes Garmin (Connect IQ) que te recuerda cuándo tomar un gel u otro avituallamiento mientras corres. Creas tu propio plan por distancia o por tiempo, y FuelCue vibra, pita y muestra una alerta a pantalla completa justo antes de cada momento.</p></details>
+<details><summary>¿Qué relojes Garmin son compatibles con FuelCue?</summary><p>Todos los relojes Garmin redondos con Connect IQ 5.0 o superior, entre ellos Forerunner 165, 170, 255, 265, 570, 70, 955, 965 y 970, fēnix 7, 8, 9 y E, epix (Gen 2) y epix Pro, Enduro 3, MARQ (Gen 2), Venu 2, 3 y 4, y vívoactive 5 y 6.</p></details>
+<details><summary>¿Puedo combinar distintos avituallamientos en un plan?</summary><p>Sí. Cada paso tiene su propio nombre (por ejemplo Gel, Dextro o Gel CAF), sus propios gramos de carbohidratos y una marca opcional de cafeína. Los pasos se pueden repetir, y las repeticiones se numeran automáticamente.</p></details>
+<details><summary>¿Puedo planificar por distancia o por tiempo?</summary><p>Ambas. Cada plan es todo por distancia (km) o todo por tiempo (minutos), con pasos de 0,5 a 100 km o de 5 a 600 minutos.</p></details>
+<details><summary>¿Por qué la alerta llega antes?</summary><p>Por defecto la alerta llega 30 segundos o 50 metros antes del momento previsto, para que no coincida con la alerta de km o de vuelta de Garmin. Ajustable de 0 (justo en el momento) a 2 minutos o 200 metros.</p></details>
+<details><summary>¿Tengo que pulsar un botón cuando tomo un gel?</summary><p>No. FuelCue es un recordatorio, no un registro. Guarda los carbohidratos previstos en tu actividad, como gráficos en Garmin Connect, sin pulsar botones que puedan alterar tu grabación.</p></details>
+<details><summary>¿FuelCue es gratis?</summary><p>Sí. FuelCue es gratis, sin suscripción, sin anuncios y sin cuenta. Se agradece un donativo por PayPal.</p></details>
+<details><summary>¿En qué idiomas está FuelCue?</summary><p>Inglés, neerlandés, alemán, francés, español e italiano, en el reloj y en los ajustes.</p></details>
+  </div>
+</div></section>
+
+<section class="donate"><div class="wrap">
+  <h2>Gratis. <em>Siempre.</em></h2>
+  <p>Sin suscripción, sin anuncios, sin cuenta. Si FuelCue te lleva hasta la meta, se agradece un donativo :)</p>
+  <a class="btn amber" href="https://paypal.me/rdbruijn">Donar con PayPal</a>
+</div></section>
+</main>
+
+<div class="stripe"></div>
+<footer><div class="wrap">
+  <span>FuelCue · Forerunner, fēnix, epix, Enduro, MARQ, Venu y vívoactive con Connect IQ 5.0+</span>
+  <nav class="langs-foot" aria-label="Language"><a href=".././" hreflang="en" lang="en">EN</a> <a href="../nl/" hreflang="nl" lang="nl">NL</a> <a href="../de/" hreflang="de" lang="de">DE</a> <a href="../fr/" hreflang="fr" lang="fr">FR</a> <a href="../es/" hreflang="es" lang="es" aria-current="page">ES</a> <a href="../it/" hreflang="it" lang="it">IT</a></nav>
+  <span>Sin relación con Garmin.</span>
+</div></footer>
+
+</body>
+</html>
