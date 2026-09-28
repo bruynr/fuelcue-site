@@ -108,7 +108,7 @@ def page(code):
         "availableLanguage": [T[c]["language"] for c in ORDER],
     }
     faq = {
-        "@context": "https://schema.org", "@type": "FAQPage", "inLanguage": code,
+        "@context": "https://schema.org", "@type": "FAQPage", "name": f"FuelSteps · {t['faq_kicker']}", "url": url, "inLanguage": code,
         "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": unlinked(a)}} for q, a in t["faq"]],
     }
     site = {"@context": "https://schema.org", "@type": "WebSite", "name": "FuelSteps", "url": BASE,
