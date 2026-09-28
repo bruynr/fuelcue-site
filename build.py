@@ -8,7 +8,7 @@ import re
 from datetime import date
 from pathlib import Path
 
-BASE = "https://bruynr.github.io/fuelcue-site/"
+BASE = "https://bruynr.github.io/fuelsteps-site/"
 DONATE = "https://paypal.me/rdbruijn"
 ORDER = ["en", "nl", "de", "fr", "es", "it"]
 ROOT = Path(__file__).parent
@@ -43,7 +43,7 @@ def page(code):
         f'<a href="{up}{path(c) or "./"}" hreflang="{c}" lang="{c}"{" aria-current=\"page\"" if c == code else ""}>{T[c]["label"]}</a>'
         for c in ORDER)
     app = {
-        "@context": "https://schema.org", "@type": "SoftwareApplication", "name": "FuelCue",
+        "@context": "https://schema.org", "@type": "SoftwareApplication", "name": "FuelSteps",
         "description": t["desc"], "url": url, "inLanguage": code,
         "applicationCategory": "SportsApplication", "applicationSubCategory": "Garmin Connect IQ data field",
         "operatingSystem": "Garmin Connect IQ 5.0+", "isAccessibleForFree": True,
@@ -70,7 +70,7 @@ def page(code):
 {alternates}
 <link rel="alternate" hreflang="x-default" href="{BASE}">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="FuelCue">
+<meta property="og:site_name" content="FuelSteps">
 <meta property="og:title" content="{esc(t["og_title"])}">
 <meta property="og:description" content="{esc(t["desc"])}">
 <meta property="og:url" content="{url}">
@@ -90,7 +90,7 @@ def page(code):
 <body>
 
 <header><div class="wrap">
-  <img src="{up}img/icon.png" alt=""><b>FuelCue</b>
+  <img src="{up}img/icon.png" alt=""><b>FuelSteps</b>
   <nav class="langs" aria-label="Language">{langs}</nav>
   <a class="btn ghost" href="{DONATE}">{t["nav_donate"]}</a>
   <span class="btn soon">{t["nav_soon"]}</span>
@@ -191,7 +191,7 @@ def page(code):
 
 <div class="stripe"></div>
 <footer><div class="wrap">
-  <span>FuelCue · {t["footer_watches"]}</span>
+  <span>FuelSteps · {t["footer_watches"]}</span>
   <nav class="langs-foot" aria-label="Language">{langs}</nav>
   <span>{t["not_affiliated"]}</span>
 </div></footer>
@@ -215,7 +215,7 @@ def llms():
     t = T["en"]
     faq = "\n".join(f"### {q}\n{unlinked(a)}\n" for q, a in t["faq"])
     pages = "\n".join(f"- [{T[c]['language']}]({BASE + path(c)})" for c in ORDER)
-    return f"""# FuelCue
+    return f"""# FuelSteps
 
 > {t["desc"]}
 

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://bruynr.github.io/fuelcue-site/sitemap.xml
+Sitemap: https://bruynr.github.io/fuelsteps-site/sitemap.xml
