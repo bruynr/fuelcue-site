@@ -46,7 +46,7 @@
     ["Kan ik plannen op afstand of op tijd?", "Allebei. Elk schema is helemaal op afstand (km) of helemaal op tijd (minuten), met stappen van 0,5 tot 100 km of van 5 tot 600 minuten."],
     ["Waarom komt de melding eerder?", "Standaard komt de melding 30 seconden of 50 meter vóór het geplande moment, zodat hij niet samenvalt met de km- of rondemelding van Garmin. Instelbaar van 0 (precies op het moment) tot 2 minuten of 200 meter."],
     ["Moet ik op een knop drukken als ik een gel neem?", "Nee. FuelCue is een herinnering, geen logboek. Het slaat de geplande koolhydraten op in je activiteit, als grafieken in Garmin Connect, zonder knoppen die je opname kunnen verstoren."],
-    ["Is FuelCue gratis?", "Ja. FuelCue is gratis, zonder abonnement, reclame of account. Een donatie via PayPal wordt gewaardeerd."],
+    ["Is FuelCue gratis?", "Ja. FuelCue is gratis, zonder abonnement, reclame of account. Een [donatie] via PayPal wordt gewaardeerd."],
     ["In welke talen is FuelCue beschikbaar?", "Engels, Nederlands, Duits, Frans, Spaans en Italiaans, op het horloge en in de instellingen."]
   ],
   "free_h2": "Gratis. <em>Altijd.</em>",

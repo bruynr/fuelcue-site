@@ -38,7 +38,7 @@ By default the alert comes 30 seconds or 50 metres before the planned moment, so
 No. FuelCue is a reminder, not a log. It saves the planned carbs in your activity, shown as charts in Garmin Connect, without button presses that could disturb your recording.
 
 ### Is FuelCue free?
-Yes. FuelCue is free, with no subscription, no ads and no account. Donations via PayPal are appreciated.
+Yes. FuelCue is free, with no subscription, no ads and no account. Donations (https://paypal.me/rdbruijn) via PayPal are appreciated.
 
 ### Which languages does FuelCue support?
 English, Dutch, German, French, Spanish and Italian, on the watch and in the settings.

@@ -46,7 +46,7 @@
     ["¿Puedo planificar por distancia o por tiempo?", "Ambas. Cada plan es todo por distancia (km) o todo por tiempo (minutos), con pasos de 0,5 a 100 km o de 5 a 600 minutos."],
     ["¿Por qué la alerta llega antes?", "Por defecto la alerta llega 30 segundos o 50 metros antes del momento previsto, para que no coincida con la alerta de km o de vuelta de Garmin. Ajustable de 0 (justo en el momento) a 2 minutos o 200 metros."],
     ["¿Tengo que pulsar un botón cuando tomo un gel?", "No. FuelCue es un recordatorio, no un registro. Guarda los carbohidratos previstos en tu actividad, como gráficos en Garmin Connect, sin pulsar botones que puedan alterar tu grabación."],
-    ["¿FuelCue es gratis?", "Sí. FuelCue es gratis, sin suscripción, sin anuncios y sin cuenta. Se agradece un donativo por PayPal."],
+    ["¿FuelCue es gratis?", "Sí. FuelCue es gratis, sin suscripción, sin anuncios y sin cuenta. Se agradece un [donativo] por PayPal."],
     ["¿En qué idiomas está FuelCue?", "Inglés, neerlandés, alemán, francés, español e italiano, en el reloj y en los ajustes."]
   ],
   "free_h2": "Gratis. <em>Siempre.</em>",

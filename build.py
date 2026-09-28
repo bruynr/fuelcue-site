@@ -4,6 +4,7 @@ Run: python build.py   (English at the root, the other languages in /<lang>/)
 """
 import json
 import html
+import re
 from datetime import date
 from pathlib import Path
 
@@ -21,6 +22,15 @@ def path(code):
 
 def esc(s):
     return html.escape(s, quote=True)
+
+
+# "[word]" in a text marks the donation link: a link in HTML, the URL written out in plain text (JSON-LD, llms.txt)
+def linked(s):
+    return re.sub(r"\[(.+?)\]", lambda m: f'<a href="{DONATE}">{m.group(1)}</a>', esc(s))
+
+
+def unlinked(s):
+    return re.sub(r"\[(.+?)\]", lambda m: f"{m.group(1)} ({DONATE})", s)
 
 
 
@@ -44,11 +54,11 @@ def page(code):
     }
     faq = {
         "@context": "https://schema.org", "@type": "FAQPage", "inLanguage": code,
-        "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in t["faq"]],
+        "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": unlinked(a)}} for q, a in t["faq"]],
     }
     ld = lambda o: json.dumps(o, ensure_ascii=False, indent=1)
     li = lambda items: "".join(f"<li>{i}</li>" for i in items)
-    faqs = "\n".join(f"<details><summary>{esc(q)}</summary><p>{esc(a)}</p></details>" for q, a in t["faq"])
+    faqs = "\n".join(f"<details><summary>{esc(q)}</summary><p>{linked(a)}</p></details>" for q, a in t["faq"])
     return f"""<!doctype html>
 <html lang="{code}">
 <head>
@@ -203,7 +213,7 @@ def sitemap():
 
 def llms():
     t = T["en"]
-    faq = "\n".join(f"### {q}\n{a}\n" for q, a in t["faq"])
+    faq = "\n".join(f"### {q}\n{unlinked(a)}\n" for q, a in t["faq"])
     pages = "\n".join(f"- [{T[c]['language']}]({BASE + path(c)})" for c in ORDER)
     return f"""# FuelCue
 
