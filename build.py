@@ -1,6 +1,7 @@
-"""Builds the site: one page per language from i18n/<lang>.json, plus sitemap.xml, robots.txt and llms.txt.
+"""Builds the site: one page per language from i18n/<lang>.json, plus images (img/web/), icons, manifest, 404,
+sitemap.xml, robots.txt, llms.txt and llms-full.txt.
 
-Run: python build.py   (English at the root, the other languages in /<lang>/)
+Run: python build.py   (English at the root, the other languages in /<lang>/; needs Pillow)
 """
 import json
 import html
@@ -14,6 +15,60 @@ ORDER = ["en", "nl", "de", "fr", "es", "it"]
 ROOT = Path(__file__).parent
 
 T = {code: json.loads((ROOT / "i18n" / f"{code}.json").read_text(encoding="utf-8")) for code in ORDER}
+
+WEB = "img/web/"            # generated from img/ by images()
+WIDTHS = [320, 480, 960]    # responsive WebP widths
+SHOTS = {"fr970-run": (612, 822), "fr970-alert": (612, 822), "fr970-half": (612, 822), "fr970-quarter": (612, 822),
+         "fenix847mm-run": (684, 897), "fenix847mm-almost": (684, 897), "fenix847mm-before": (684, 897)}
+LANG_KEY = "fuelsteps-lang"  # localStorage: language picked in the switcher
+
+# home page only: on the first visit send the visitor to their browser language; a choice in the switcher wins
+REDIRECT = f"""<script>
+(function () {{
+  try {{
+    var langs = {json.dumps(ORDER[1:])}, saved = localStorage.getItem("{LANG_KEY}");
+    if (saved) {{ if (langs.indexOf(saved) >= 0) location.replace(saved + "/"); return; }}
+    var prefs = navigator.languages || [navigator.language || ""];
+    for (var i = 0; i < prefs.length; i++) {{
+      var l = String(prefs[i]).slice(0, 2).toLowerCase();
+      if (l === "en") return;
+      if (langs.indexOf(l) >= 0) {{ location.replace(l + "/"); return; }}
+    }}
+  }} catch (e) {{}}
+}})();
+</script>"""
+
+REMEMBER = f"""<script>
+document.querySelectorAll("a[hreflang]").forEach(function (a) {{
+  a.addEventListener("click", function () {{ try {{ localStorage.setItem("{LANG_KEY}", a.hreflang); }} catch (e) {{}} }});
+}});
+</script>"""
+
+
+def images():
+    from PIL import Image
+    out = ROOT / WEB
+    out.mkdir(parents=True, exist_ok=True)
+    for name in SHOTS:
+        im = Image.open(ROOT / "img" / f"{name}.png").convert("RGB")
+        for w in WIDTHS:
+            im.resize((w, round(im.height * w / im.width)), Image.LANCZOS).save(out / f"{name}-{w}.webp", "WEBP", quality=82, method=6)
+    icon = Image.open(ROOT / "img" / "icon.png").convert("RGBA")
+    for n in [32, 180, 192, 512]:
+        icon.resize((n, n), Image.LANCZOS).save(out / f"icon-{n}.png")
+    Image.open(ROOT / "img" / "og.png").convert("RGB").resize((1200, 600), Image.LANCZOS).save(out / "og.jpg", quality=86)
+
+
+def pic(up, name, alt, sizes, lazy=True, cls=""):
+    w, h = SHOTS[name]
+    srcset = ", ".join(f"{up}{WEB}{name}-{x}.webp {x}w" for x in WIDTHS)
+    extra = ' loading="lazy"' if lazy else ' fetchpriority="high"'
+    c = f' class="{cls}"' if cls else ""
+    return f'<img{c} src="{up}{WEB}{name}-480.webp" srcset="{srcset}" sizes="{sizes}" alt="{esc(alt)}" width="{w}" height="{h}"{extra}>'
+
+
+def strip(s):
+    return re.sub(r"<[^>]+>", "", s.replace("<br>", " "))
 
 
 def path(code):
@@ -48,7 +103,7 @@ def page(code):
         "applicationCategory": "SportsApplication", "applicationSubCategory": "Garmin Connect IQ data field",
         "operatingSystem": "Garmin Connect IQ 5.0+", "isAccessibleForFree": True,
         "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"},
-        "image": BASE + "img/icon.png",
+        "image": BASE + WEB + "icon-512.png",
         "screenshot": [BASE + "img/fr970-run.png", BASE + "img/fr970-alert.png", BASE + "img/fenix847mm-before.png"],
         "availableLanguage": [T[c]["language"] for c in ORDER],
     }
@@ -56,6 +111,8 @@ def page(code):
         "@context": "https://schema.org", "@type": "FAQPage", "inLanguage": code,
         "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": unlinked(a)}} for q, a in t["faq"]],
     }
+    site = {"@context": "https://schema.org", "@type": "WebSite", "name": "FuelSteps", "url": BASE,
+            "inLanguage": ORDER, "description": T["en"]["desc"]}
     ld = lambda o: json.dumps(o, ensure_ascii=False, indent=1)
     li = lambda items: "".join(f"<li>{i}</li>" for i in items)
     faqs = "\n".join(f"<details><summary>{esc(q)}</summary><p>{linked(a)}</p></details>" for q, a in t["faq"])
@@ -74,11 +131,16 @@ def page(code):
 <meta property="og:title" content="{esc(t["og_title"])}">
 <meta property="og:description" content="{esc(t["desc"])}">
 <meta property="og:url" content="{url}">
-<meta property="og:image" content="{BASE}img/og.png">
+<meta property="og:image" content="{BASE}{WEB}og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="600">
 <meta property="og:locale" content="{t["locale"]}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#15171a">
-<link rel="icon" href="{up}img/icon.png">
+<link rel="icon" href="{up}{WEB}icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="{up}{WEB}icon-180.png">
+<link rel="manifest" href="{up}manifest.webmanifest">
+{REDIRECT if code == "en" else ""}
 <link rel="stylesheet" href="{up}style.css">
 <script type="application/ld+json">
 {ld(app)}
@@ -86,11 +148,14 @@ def page(code):
 <script type="application/ld+json">
 {ld(faq)}
 </script>
+<script type="application/ld+json">
+{ld(site)}
+</script>
 </head>
 <body>
 
 <header><div class="wrap">
-  <img src="{up}img/icon.png" alt=""><b>FuelSteps</b>
+  <img src="{up}{WEB}icon-192.png" alt="" width="38" height="38"><b>FuelSteps</b>
   <nav class="langs" aria-label="Language">{langs}</nav>
   <a class="btn ghost" href="{DONATE}">{t["nav_donate"]}</a>
   <span class="btn soon">{t["nav_soon"]}</span>
@@ -107,7 +172,7 @@ def page(code):
       <a class="btn amber" href="{DONATE}">{t["hero_gel"]}</a>
     </div>
   </div>
-  <img class="watch" src="{up}img/fr970-run.png" alt="{esc(t["alt_hero"])}" width="612" height="822">
+  {pic(up, "fr970-run", t["alt_hero"], "(max-width: 820px) 90vw, 460px", lazy=False, cls="watch")}
 </div></section>
 
 <section><div class="wrap split rev">
@@ -133,7 +198,7 @@ def page(code):
     <h2>{t["alert_h2"]}</h2>
     <p class="lead">{t["alert_lead"]}</p>
   </div>
-  <img class="watch" src="{up}img/fr970-alert.png" alt="{esc(t["alt_alert"])}" width="612" height="822" loading="lazy">
+  {pic(up, "fr970-alert", t["alt_alert"], "(max-width: 820px) 90vw, 460px", cls="watch")}
 </div></section>
 
 <section><div class="wrap split rev">
@@ -143,8 +208,8 @@ def page(code):
     <p class="lead">{t["glance_lead"]}</p>
   </div>
   <div class="pair">
-    <img src="{up}img/fenix847mm-run.png" alt="{esc(t["alt_run"])}" width="684" height="897" loading="lazy">
-    <img src="{up}img/fenix847mm-almost.png" alt="{esc(t["alt_almost"])}" width="684" height="897" loading="lazy">
+    {pic(up, "fenix847mm-run", t["alt_run"], "(max-width: 820px) 45vw, 330px")}
+    {pic(up, "fenix847mm-almost", t["alt_almost"], "(max-width: 820px) 45vw, 330px")}
   </div>
 </div></section>
 
@@ -153,9 +218,9 @@ def page(code):
   <h2>{t["layout_h2"]}</h2>
   <p class="lead" style="margin: 18px auto 44px;">{t["layout_lead"]}</p>
   <div class="faces">
-    <div class="face"><div><img src="{up}img/fr970-run.png" alt="" loading="lazy"></div>{t["full"]}</div>
-    <div class="face"><div><img src="{up}img/fr970-half.png" alt="" loading="lazy"></div>{t["half"]}</div>
-    <div class="face"><div><img src="{up}img/fr970-quarter.png" alt="" loading="lazy"></div>{t["quarter"]}</div>
+    <div class="face"><div>{pic(up, "fr970-run", "", "270px")}</div>{t["full"]}</div>
+    <div class="face"><div>{pic(up, "fr970-half", "", "270px")}</div>{t["half"]}</div>
+    <div class="face"><div>{pic(up, "fr970-quarter", "", "270px")}</div>{t["quarter"]}</div>
   </div>
 </div></section>
 
@@ -196,6 +261,7 @@ def page(code):
   <span>{t["not_affiliated"]}</span>
 </div></footer>
 
+{REMEMBER}
 </body>
 </html>
 """
@@ -229,12 +295,100 @@ def llms():
 
 ## Pages
 {pages}
+- [Full text (English)]({BASE}llms-full.txt)
 
 ## FAQ
 {faq}"""
 
 
+def manifest():
+    return json.dumps({
+        "name": "FuelSteps", "short_name": "FuelSteps", "description": T["en"]["desc"],
+        "start_url": "./", "display": "browser", "background_color": "#f6f3ec", "theme_color": "#15171a",
+        "icons": [{"src": f"{WEB}icon-{n}.png", "sizes": f"{n}x{n}", "type": "image/png"} for n in (192, 512)],
+    }, indent=1) + "\n"
+
+
+# GitHub Pages serves it for every unknown path, so all links are absolute
+def not_found():
+    langs = " ".join(f'<a href="{BASE + path(c)}" hreflang="{c}" lang="{c}">{T[c]["language"]}</a>' for c in ORDER)
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page not found · FuelSteps</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="{BASE}{WEB}icon-32.png" sizes="32x32" type="image/png">
+<link rel="stylesheet" href="{BASE}style.css">
+</head>
+<body>
+<main><section class="alt" style="min-height: 100vh; display: flex; align-items: center;"><div class="wrap" style="text-align: center;">
+  <img src="{BASE}{WEB}icon-192.png" alt="" width="96" height="96">
+  <div class="kicker" style="margin-top: 24px;">404</div>
+  <h1>Off <em>course.</em></h1>
+  <p class="lead" style="margin: 22px auto 30px;">This page doesn't exist. Head back to the start line:</p>
+  <p><a class="btn dark" href="{BASE}">FuelSteps</a></p>
+  <p style="margin-top: 26px;">{langs}</p>
+</div></section></main>
+</body>
+</html>
+"""
+
+
+# the whole English page as plain markdown, for AI crawlers
+def llms_full():
+    t = T["en"]
+    bullets = lambda items: "\n".join(f"- {strip(i)}" for i in items)
+    faq = "\n".join(f"### {q}\n{unlinked(a)}\n" for q, a in t["faq"])
+    return f"""# FuelSteps: {strip(t["hero_h1"])}
+
+> {t["desc"]}
+
+{strip(t["hero_lead"])}
+
+Website: {BASE} · Donations: {DONATE}
+
+## {strip(t["sched_h2"])}
+{strip(t["sched_lead"])}
+
+{bullets(t["sched_li"])}
+
+Example schedule ({t["card_title"]}):
+- 0 km: Gel, 25 g ({t["tag_before"]})
+- 7 km: Gel, 25 g
+- 7 km: Dextro, 15 g
+- 7 km: Gel CAF, 25 g, {t["tag_caf"]}
+- 2× 7 km: Gel, 25 g (Gel #1, Gel #2)
+
+## {strip(t["alert_h2"])}
+{strip(t["alert_lead"])}
+
+## {strip(t["glance_h2"])}
+{strip(t["glance_lead"])}
+
+## {strip(t["layout_h2"])}
+{strip(t["layout_lead"])} ({t["full"]}, {t["half"]}, {t["quarter"]})
+
+## {strip(t["start_h2"])}
+{chr(10).join(f"{i + 1}. {strip(s)}" for i, s in enumerate(t["steps"]))}
+
+## {strip(t["after_h2"])}
+{bullets(t["after_li"])}
+
+## FAQ
+{faq}
+## {strip(t["free_h2"])}
+{strip(t["free_p"])} {DONATE}
+
+Watches: {t["footer_watches"]}. {t["not_affiliated"]}
+
+Other languages: {", ".join(f"{T[c]['language']} {BASE + path(c)}" for c in ORDER[1:])}
+"""
+
+
 def main():
+    images()
     for code in ORDER:
         out = ROOT / path(code) / "index.html"
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -242,6 +396,9 @@ def main():
     (ROOT / "sitemap.xml").write_text(sitemap(), encoding="utf-8", newline="\n")
     (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {BASE}sitemap.xml\n", encoding="utf-8", newline="\n")
     (ROOT / "llms.txt").write_text(llms(), encoding="utf-8", newline="\n")
+    (ROOT / "llms-full.txt").write_text(llms_full(), encoding="utf-8", newline="\n")
+    (ROOT / "manifest.webmanifest").write_text(manifest(), encoding="utf-8", newline="\n")
+    (ROOT / "404.html").write_text(not_found(), encoding="utf-8", newline="\n")
     print("built:", ", ".join(ORDER))
 
 

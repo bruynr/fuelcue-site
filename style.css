@@ -36,7 +36,7 @@ h1 em, h2 em { font-style: normal; color: var(--blue); }
 .face { text-align: center; font-weight: 800; letter-spacing: 1.5px; color: #777; font-size: 14px; }
 .face div { width: 230px; height: 230px; border-radius: 50%; overflow: hidden; position: relative; background: #000;
             box-shadow: 0 18px 44px rgba(0, 0, 0, .25); margin-bottom: 14px; }
-.face img { position: absolute; width: 116.8%; left: -9.35%; top: -26.7%; }
+.face img { position: absolute; width: 116.8%; height: auto; left: -9.35%; top: -26.7%; }
 ul.checks { list-style: none; padding: 0; margin-top: 24px; font-size: 19px; color: var(--muted); }
 ul.checks li { padding: 7px 0 7px 34px; position: relative; }
 ul.checks li::before { content: ""; position: absolute; left: 4px; top: 15px; width: 14px; height: 14px; border-radius: 50%; background: var(--amber); }
