@@ -45,6 +45,9 @@ document.querySelectorAll("a[hreflang]").forEach(function (a) {{
 }});
 </script>"""
 
+# Cloudflare Web Analytics: no cookies, no personal data, so no consent banner (JS snippet: DNS stays "DNS only")
+ANALYTICS = """<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "973a24375d1b4099a8a741239c7c7386"}'></script>"""
+
 
 def images():
     from PIL import Image
@@ -151,6 +154,7 @@ def page(code):
 <script type="application/ld+json">
 {ld(site)}
 </script>
+{ANALYTICS}
 </head>
 <body>
 
@@ -321,6 +325,7 @@ def not_found():
 <meta name="robots" content="noindex">
 <link rel="icon" href="{BASE}{WEB}icon-32.png" sizes="32x32" type="image/png">
 <link rel="stylesheet" href="{BASE}style.css">
+{ANALYTICS}
 </head>
 <body>
 <main><section class="alt" style="min-height: 100vh; display: flex; align-items: center;"><div class="wrap" style="text-align: center;">
