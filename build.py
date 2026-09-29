@@ -9,7 +9,7 @@ import re
 from datetime import date
 from pathlib import Path
 
-BASE = "https://bruynr.github.io/fuelsteps-site/"
+BASE = "https://fuelsteps.com/"
 DONATE = "https://paypal.me/rdbruijn"
 ORDER = ["en", "nl", "de", "fr", "es", "it"]
 ROOT = Path(__file__).parent
