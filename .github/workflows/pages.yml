@@ -34,3 +34,6 @@ jobs:
           path: .
       - id: deployment
         uses: actions/deploy-pages@v5
+      - name: Ping IndexNow
+        run: python build.py indexnow
+        continue-on-error: true

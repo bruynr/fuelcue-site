@@ -1,5 +1,5 @@
 """Builds the site: one page per language from i18n/<lang>.json, plus images (img/web/), icons, manifest, 404,
-sitemap.xml, robots.txt, llms.txt and llms-full.txt.
+sitemap.xml, robots.txt, llms.txt, llms-full.txt and the IndexNow key file. `python build.py indexnow` pings IndexNow (after a deploy).
 
 Run: python build.py   (English at the root, the other languages in /<lang>/; needs Pillow)
 """
@@ -21,6 +21,7 @@ WIDTHS = [320, 480, 960]    # responsive WebP widths
 SHOTS = {"fr970-run": (612, 822), "fr970-alert": (612, 822), "fr970-half": (612, 822), "fr970-quarter": (612, 822),
          "fenix847mm-run": (684, 897), "fenix847mm-almost": (684, 897), "fenix847mm-before": (684, 897)}
 LANG_KEY = "fuelsteps-lang"  # localStorage: language picked in the switcher
+INDEXNOW_KEY = "1d775e9d727f50ad83cd05991cf82236"  # public by design: served as /<key>.txt (Bing, Yandex, …)
 
 # home page only: on the first visit send the visitor to their browser language; a choice in the switcher wins
 REDIRECT = f"""<script>
@@ -399,8 +400,22 @@ def main():
     (ROOT / "llms-full.txt").write_text(llms_full(), encoding="utf-8", newline="\n")
     (ROOT / "manifest.webmanifest").write_text(manifest(), encoding="utf-8", newline="\n")
     (ROOT / "404.html").write_text(not_found(), encoding="utf-8", newline="\n")
+    (ROOT / f"{INDEXNOW_KEY}.txt").write_text(INDEXNOW_KEY, encoding="utf-8", newline="\n")
     print("built:", ", ".join(ORDER))
 
 
+def indexnow():
+    """After a deploy: tell IndexNow search engines that all language pages changed."""
+    import urllib.request
+    host = BASE.split("/")[2]
+    body = {"host": host, "key": INDEXNOW_KEY, "keyLocation": f"{BASE}{INDEXNOW_KEY}.txt",
+            "urlList": [BASE + path(c) for c in ORDER]}
+    req = urllib.request.Request("https://api.indexnow.org/indexnow", data=json.dumps(body).encode(),
+                                 headers={"Content-Type": "application/json; charset=utf-8"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        print("indexnow:", r.status, len(body["urlList"]), "urls")
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    indexnow() if sys.argv[1:] == ["indexnow"] else main()
