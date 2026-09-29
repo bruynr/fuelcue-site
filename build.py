@@ -106,7 +106,6 @@ def page(code):
         "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"},
         "image": BASE + WEB + "icon-512.png",
         "screenshot": [BASE + "img/fr970-run.png", BASE + "img/fr970-alert.png", BASE + "img/fenix847mm-before.png"],
-        "availableLanguage": [T[c]["language"] for c in ORDER],
     }
     faq = {
         "@context": "https://schema.org", "@type": "FAQPage", "name": f"FuelSteps · {t['faq_kicker']}", "url": url, "inLanguage": code,
