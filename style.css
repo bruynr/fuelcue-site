@@ -60,3 +60,10 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 .faq details { background: #fff; border-radius: 16px; padding: 18px 22px; margin-bottom: 12px; box-shadow: 0 6px 20px rgba(40, 30, 0, .06); }
 .faq summary { font-size: 20px; font-weight: 700; cursor: pointer; }
 .faq details p { font-size: 18px; color: var(--muted); margin-top: 10px; }
+.overlay { position: fixed; inset: 0; z-index: 20; background: rgba(21, 23, 26, .6); display: flex; align-items: center; justify-content: center; padding: 28px; }
+.overlay[hidden] { display: none; }
+.overlay-box { position: relative; background: #fff; border-radius: 24px; padding: 38px 34px 34px; max-width: 430px; width: 100%; text-align: center;
+               box-shadow: 0 24px 60px rgba(0, 0, 0, .3); }
+.overlay-box h3 { font-size: 24px; letter-spacing: -.5px; margin-bottom: 10px; }
+.overlay-box .btn { display: block; margin-top: 12px; }
+.overlay-close { position: absolute; top: 14px; right: 18px; border: 0; background: none; font-size: 20px; cursor: pointer; color: var(--muted); }

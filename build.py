@@ -10,7 +10,9 @@ from datetime import date
 from pathlib import Path
 
 BASE = "https://fuelsteps.com/"
-DONATE = "https://paypal.me/rdbruijn"
+DONATE_PAYPAL = "https://paypal.me/rdbruijn"
+DONATE_BUNQ = "https://bunq.me/fuelsteps"  # iDEAL/WERO
+PLAIN_DONATE = f"{DONATE_PAYPAL} · {DONATE_BUNQ}"  # for plain-text output (JSON-LD, llms.txt)
 ORDER = ["en", "nl", "de", "fr", "es", "it"]
 ROOT = Path(__file__).parent
 
@@ -43,6 +45,18 @@ REMEMBER = f"""<script>
 document.querySelectorAll("a[hreflang]").forEach(function (a) {{
   a.addEventListener("click", function () {{ try {{ localStorage.setItem("{LANG_KEY}", a.hreflang); }} catch (e) {{}} }});
 }});
+</script>"""
+
+# donation links open the overlay with both options; without JS the href (bunq on NL, PayPal elsewhere) still works
+DONATE_JS = """<script>
+(function () {
+  var o = document.getElementById("donate");
+  document.querySelectorAll("a[data-donate]").forEach(function (a) {
+    a.addEventListener("click", function (e) { e.preventDefault(); o.hidden = false; });
+  });
+  o.addEventListener("click", function (e) { if (e.target === o || e.target.closest(".overlay-close")) o.hidden = true; });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") o.hidden = true; });
+})();
 </script>"""
 
 # Cloudflare Web Analytics: no cookies, no personal data, so no consent banner (JS snippet: DNS stays "DNS only")
@@ -83,13 +97,13 @@ def esc(s):
     return html.escape(s, quote=True)
 
 
-# "[word]" in a text marks the donation link: a link in HTML, the URL written out in plain text (JSON-LD, llms.txt)
-def linked(s):
-    return re.sub(r"\[(.+?)\]", lambda m: f'<a href="{DONATE}">{m.group(1)}</a>', esc(s))
+# "[word]" in a text marks the donation link: an overlay trigger in HTML, the URLs written out in plain text (JSON-LD, llms.txt)
+def linked(s, url):
+    return re.sub(r"\[(.+?)\]", lambda m: f'<a href="{url}" data-donate>{m.group(1)}</a>', esc(s))
 
 
-def unlinked(s):
-    return re.sub(r"\[(.+?)\]", lambda m: f"{m.group(1)} ({DONATE})", s)
+def unlinked(s, urls):
+    return re.sub(r"\[(.+?)\]", lambda m: f"{m.group(1)} ({urls})", s)
 
 
 
@@ -97,6 +111,12 @@ def page(code):
     t = T[code]
     up = "" if code == "en" else "../"
     url = BASE + path(code)
+    donates = [(DONATE_BUNQ, t["donate_bunq"]), (DONATE_PAYPAL, t["donate_paypal"])]
+    if code != "nl":
+        donates.reverse()  # bunq (iDEAL/WERO) on top only for Dutch visitors
+    donate = donates[0][0]  # no-JS fallback for the trigger links
+    donate_plain = " · ".join(u for u, _ in donates)
+    donate_btns = "".join(f'\n    <a class="btn {cls}" href="{u}">{esc(label)}</a>' for (u, label), cls in zip(donates, ("amber", "dark")))
     alternates = "\n".join(f'<link rel="alternate" hreflang="{c}" href="{BASE + path(c)}">' for c in ORDER)
     langs = " ".join(
         f'<a href="{up}{path(c) or "./"}" hreflang="{c}" lang="{c}"{" aria-current=\"page\"" if c == code else ""}>{T[c]["label"]}</a>'
@@ -112,13 +132,13 @@ def page(code):
     }
     faq = {
         "@context": "https://schema.org", "@type": "FAQPage", "name": f"FuelSteps · {t['faq_kicker']}", "url": url, "inLanguage": code,
-        "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": unlinked(a)}} for q, a in t["faq"]],
+        "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": unlinked(a, donate_plain)}} for q, a in t["faq"]],
     }
     site = {"@context": "https://schema.org", "@type": "WebSite", "name": "FuelSteps", "url": BASE,
             "inLanguage": ORDER, "description": T["en"]["desc"]}
     ld = lambda o: json.dumps(o, ensure_ascii=False, indent=1)
     li = lambda items: "".join(f"<li>{i}</li>" for i in items)
-    faqs = "\n".join(f"<details><summary>{esc(q)}</summary><p>{linked(a)}</p></details>" for q, a in t["faq"])
+    faqs = "\n".join(f"<details><summary>{esc(q)}</summary><p>{linked(a, donate)}</p></details>" for q, a in t["faq"])
     return f"""<!doctype html>
 <html lang="{code}">
 <head>
@@ -161,7 +181,7 @@ def page(code):
 <header><div class="wrap">
   <img src="{up}{WEB}icon-192.png" alt="" width="38" height="38"><b>FuelSteps</b>
   <nav class="langs" aria-label="Language">{langs}</nav>
-  <a class="btn ghost" href="{DONATE}">{t["nav_donate"]}</a>
+  <a class="btn ghost" href="{donate}" data-donate>{t["nav_donate"]}</a>
   <span class="btn soon">{t["nav_soon"]}</span>
 </div></header>
 
@@ -173,7 +193,7 @@ def page(code):
     <p class="lead">{t["hero_lead"]}</p>
     <div class="ctas">
       <span class="btn soon">{t["hero_soon"]}</span>
-      <a class="btn amber" href="{DONATE}">{t["hero_gel"]}</a>
+      <a class="btn amber" href="{donate}" data-donate>{t["hero_gel"]}</a>
     </div>
   </div>
   {pic(up, "fr970-run", t["alt_hero"], "(max-width: 820px) 90vw, 460px", lazy=False, cls="watch")}
@@ -254,7 +274,7 @@ def page(code):
 <section class="donate"><div class="wrap">
   <h2>{t["free_h2"]}</h2>
   <p>{t["free_p"]}</p>
-  <a class="btn amber" href="{DONATE}">{t["free_btn"]}</a>
+  <a class="btn amber" href="{donate}" data-donate>{t["free_btn"]}</a>
 </div></section>
 </main>
 
@@ -265,7 +285,15 @@ def page(code):
   <span>{t["not_affiliated"]}</span>
 </div></footer>
 
+<div class="overlay" id="donate" hidden>
+  <div class="overlay-box" role="dialog" aria-modal="true" aria-labelledby="donate-title">
+    <button class="overlay-close" aria-label="{esc(t["donate_close"])}">✕</button>
+    <h3 id="donate-title">{esc(t["donate_title"])}</h3>{donate_btns}
+  </div>
+</div>
+
 {REMEMBER}
+{DONATE_JS}
 </body>
 </html>
 """
@@ -283,14 +311,14 @@ def sitemap():
 
 def llms():
     t = T["en"]
-    faq = "\n".join(f"### {q}\n{unlinked(a)}\n" for q, a in t["faq"])
+    faq = "\n".join(f"### {q}\n{unlinked(a, PLAIN_DONATE)}\n" for q, a in t["faq"])
     pages = "\n".join(f"- [{T[c]['language']}]({BASE + path(c)})" for c in ORDER)
     return f"""# FuelSteps
 
 > {t["desc"]}
 
 - Type: Garmin Connect IQ data field (runs inside the native Run activity)
-- Price: free, no subscription, no ads, no account; donations: {DONATE}
+- Price: free, no subscription, no ads, no account; donations: {PLAIN_DONATE}
 - Watches: round Garmin watches with Connect IQ 5.0+ (Forerunner 165–970, fēnix 7/8/9/E, epix Gen 2/Pro, Enduro 3, MARQ Gen 2, Venu 2/3/4, vívoactive 5/6)
 - Schedules: up to 5, each a chain of steps by distance (km) or time (min) with repeats; per step a name, grams of carbs and a caffeine mark
 - Alert: vibration, tone and full screen, 30 s / 50 m before the planned moment by default
@@ -345,14 +373,14 @@ def not_found():
 def llms_full():
     t = T["en"]
     bullets = lambda items: "\n".join(f"- {strip(i)}" for i in items)
-    faq = "\n".join(f"### {q}\n{unlinked(a)}\n" for q, a in t["faq"])
+    faq = "\n".join(f"### {q}\n{unlinked(a, PLAIN_DONATE)}\n" for q, a in t["faq"])
     return f"""# FuelSteps: {strip(t["hero_h1"])}
 
 > {t["desc"]}
 
 {strip(t["hero_lead"])}
 
-Website: {BASE} · Donations: {DONATE}
+Website: {BASE} · Donations: {PLAIN_DONATE}
 
 ## {strip(t["sched_h2"])}
 {strip(t["sched_lead"])}
@@ -384,7 +412,7 @@ Example schedule ({t["card_title"]}):
 ## FAQ
 {faq}
 ## {strip(t["free_h2"])}
-{strip(t["free_p"])} {DONATE}
+{strip(t["free_p"])} {PLAIN_DONATE}
 
 Watches: {t["footer_watches"]}. {t["not_affiliated"]}
 

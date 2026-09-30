@@ -46,12 +46,16 @@
     ["Can I plan by distance or by time?", "Both. Each schedule is either all distance (km) or all time (minutes), with steps from 0.5 to 100 km or from 5 to 600 minutes."],
     ["Why does the alert come early?", "By default the alert comes 30 seconds or 50 metres before the planned moment, so it doesn't clash with Garmin's own km or lap alert. You can set it from 0 (exactly on the moment) up to 2 minutes or 200 metres."],
     ["Do I have to press a button when I take a gel?", "No. FuelSteps is a reminder, not a log. It saves the planned carbs in your activity, shown as charts in Garmin Connect, without button presses that could disturb your recording."],
-    ["Is FuelSteps free?", "Yes. FuelSteps is free, with no subscription, no ads and no account. [Donations] via PayPal are appreciated."],
+    ["Is FuelSteps free?", "Yes. FuelSteps is free, with no subscription, no ads and no account. [Donations] are appreciated."],
     ["Which languages does FuelSteps support?", "English, Dutch, German, French, Spanish and Italian, on the watch and in the settings."]
   ],
   "free_h2": "Free. <em>Always.</em>",
   "free_p": "No subscription, no ads, no account. If FuelSteps gets you to the finish, donations are appreciated :)",
-  "free_btn": "Donate via PayPal",
+  "free_btn": "Donate",
+  "donate_title": "Choose how to donate",
+  "donate_bunq": "Donate via bunq (iDEAL/WERO)",
+  "donate_paypal": "Donate via PayPal",
+  "donate_close": "Close",
   "footer_watches": "Forerunner, fēnix, epix, Enduro, MARQ, Venu and vívoactive with Connect IQ 5.0+",
   "not_affiliated": "Not affiliated with Garmin."
 }

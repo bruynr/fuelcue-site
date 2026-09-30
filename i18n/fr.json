@@ -46,12 +46,16 @@
     ["Puis-je planifier à la distance ou au temps ?", "Les deux. Chaque plan est entièrement à la distance (km) ou entièrement au temps (minutes), avec des étapes de 0,5 à 100 km ou de 5 à 600 minutes."],
     ["Pourquoi l'alerte arrive-t-elle en avance ?", "Par défaut, l'alerte arrive 30 secondes ou 50 mètres avant le moment prévu, pour ne pas tomber en même temps que l'alerte de km ou de tour de Garmin. Réglable de 0 (pile au moment) à 2 minutes ou 200 mètres."],
     ["Dois-je appuyer sur un bouton quand je prends un gel ?", "Non. FuelSteps est un rappel, pas un journal. Il enregistre les glucides prévus dans ton activité, en graphiques dans Garmin Connect, sans appui sur un bouton qui pourrait perturber ton enregistrement."],
-    ["FuelSteps est-il gratuit ?", "Oui. FuelSteps est gratuit, sans abonnement, sans publicité et sans compte. Un [don] via PayPal fait toujours plaisir."],
+    ["FuelSteps est-il gratuit ?", "Oui. FuelSteps est gratuit, sans abonnement, sans publicité et sans compte. Un [don] fait toujours plaisir."],
     ["Dans quelles langues FuelSteps est-il disponible ?", "Anglais, néerlandais, allemand, français, espagnol et italien, sur la montre et dans les paramètres."]
   ],
   "free_h2": "Gratuit. <em>Toujours.</em>",
   "free_p": "Pas d'abonnement, pas de publicité, pas de compte. Si FuelSteps t'emmène jusqu'à l'arrivée, un don fait toujours plaisir :)",
-  "free_btn": "Faire un don via PayPal",
+  "free_btn": "Faire un don",
+  "donate_title": "Choisis comment faire un don",
+  "donate_bunq": "Faire un don via bunq (iDEAL/WERO)",
+  "donate_paypal": "Faire un don via PayPal",
+  "donate_close": "Fermer",
   "footer_watches": "Forerunner, fēnix, epix, Enduro, MARQ, Venu et vívoactive avec Connect IQ 5.0+",
   "not_affiliated": "Sans lien avec Garmin."
 }
