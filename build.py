@@ -30,12 +30,12 @@ REDIRECT = f"""<script>
 (function () {{
   try {{
     var langs = {json.dumps(ORDER[1:])}, saved = localStorage.getItem("{LANG_KEY}");
-    if (saved) {{ if (langs.indexOf(saved) >= 0) location.replace(saved + "/"); return; }}
+    if (saved) {{ if (langs.indexOf(saved) >= 0) location.replace(saved + "/" + location.hash); return; }}
     var prefs = navigator.languages || [navigator.language || ""];
     for (var i = 0; i < prefs.length; i++) {{
       var l = String(prefs[i]).slice(0, 2).toLowerCase();
       if (l === "en") return;
-      if (langs.indexOf(l) >= 0) {{ location.replace(l + "/"); return; }}
+      if (langs.indexOf(l) >= 0) {{ location.replace(l + "/" + location.hash); return; }}
     }}
   }} catch (e) {{}}
 }})();
@@ -50,7 +50,7 @@ document.querySelectorAll("a[hreflang]").forEach(function (a) {{
 # donation links open the overlay with both options; without JS the href (bunq on NL, PayPal elsewhere) still works
 DONATE_JS = """<script>
 (function () {
-  var o = document.getElementById("donate");
+  var o = document.getElementById("donate-overlay");
   document.querySelectorAll("a[data-donate]").forEach(function (a) {
     a.addEventListener("click", function (e) { e.preventDefault(); o.hidden = false; });
   });
@@ -271,7 +271,7 @@ def page(code):
   </div>
 </div></section>
 
-<section class="donate"><div class="wrap">
+<section class="donate" id="donate"><div class="wrap">
   <h2>{t["free_h2"]}</h2>
   <p>{t["free_p"]}</p>
   <a class="btn amber" href="{donate}" data-donate>{t["free_btn"]}</a>
@@ -285,7 +285,7 @@ def page(code):
   <span>{t["not_affiliated"]}</span>
 </div></footer>
 
-<div class="overlay" id="donate" hidden>
+<div class="overlay" id="donate-overlay" hidden>
   <div class="overlay-box" role="dialog" aria-modal="true" aria-labelledby="donate-title">
     <button class="overlay-close" aria-label="{esc(t["donate_close"])}">✕</button>
     <h3 id="donate-title">{esc(t["donate_title"])}</h3>{donate_btns}
