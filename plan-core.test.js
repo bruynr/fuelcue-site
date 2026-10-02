@@ -1,7 +1,7 @@
 // plan-core.test.js
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseStepText, formatStep, LIMITS } from "./plan-core.js";
+import { parseStepText, formatStep, LIMITS, TEMPLATES, validate, fields, moments, fromJSON, newStep } from "./plan-core.js";
 
 const step = (size, repeat, text, carbs, caf) => ({ size, repeat, text, carbs, caf });
 
@@ -64,4 +64,101 @@ test("limits", () => {
   assert.equal(LIMITS.min.max, 600);
   assert.equal(LIMITS.repeatMax, 30);
   assert.equal(LIMITS.fieldMax, 40);
+});
+
+const sched = (unit, steps, name = "Test") => ({ name, unit, steps });
+
+test("templates are valid and have the agreed content", () => {
+  assert.deepEqual(TEMPLATES.map(t => t.id), ["gel5", "marathon7", "time30"]);
+  for (const t of TEMPLATES) assert.equal(validate(t.schedule).ok, true, t.id);
+  assert.deepEqual(fields(TEMPLATES[0].schedule), { name: "Gel 5 km", unit: "km", steps: ["3x5 Gel 25 caf", "-", "-", "-", "-", "-", "-", "-"] });
+  assert.deepEqual(fields(TEMPLATES[1].schedule).steps.slice(0, 5), ["0 Gel 25", "7 Gel 25", "7 Dextro 15", "7 Gel CAF 25 caf", "2x7 Gel 25"]);
+  assert.deepEqual(fields(TEMPLATES[2].schedule), { name: "Every 30 min", unit: "min", steps: ["6x30 Gel 25", "-", "-", "-", "-", "-", "-", "-"] });
+});
+
+test("validate: ok schedule", () => {
+  const v = validate(sched("km", [step(0, 1, "Gel", 25, false), step(5, 3, "Gel", 25, true)]));
+  assert.deepEqual(v, { ok: true, name: null, steps: [null, null], warnings: [null, null] });
+});
+
+test("validate: name", () => {
+  assert.equal(validate(sched("km", [step(5, 1, "Gel", 25, false)], "")).name, "name_empty");
+  assert.equal(validate(sched("km", [step(5, 1, "Gel", 25, false)], "   ")).name, "name_empty");
+  assert.equal(validate(sched("km", [step(5, 1, "Gel", 25, false)], "12345678901234567")).name, "name_long");
+  assert.equal(validate(sched("km", [step(5, 1, "Gel", 25, false)], "1234567890123456")).name, null);
+});
+
+test("validate: steps", () => {
+  assert.equal(validate(sched("km", [])).steps.length, 0);
+  assert.equal(validate(sched("km", [])).ok, false);
+  assert.equal(validate(sched("km", [step(5, 0, "Gel", 25, false)])).steps[0], "repeat");
+  assert.equal(validate(sched("km", [step(5, 31, "Gel", 25, false)])).steps[0], "repeat");
+  assert.equal(validate(sched("km", [step(5, 1.5, "Gel", 25, false)])).steps[0], "repeat");
+  assert.equal(validate(sched("km", [step(0.4, 1, "Gel", 25, false)])).steps[0], "size_min");
+  assert.equal(validate(sched("min", [step(4, 1, "Gel", 25, false)])).steps[0], "size_min");
+  assert.equal(validate(sched("km", [step(5, 1, "Gel", 25, false), step(0, 1, "Gel", 25, false)])).steps[1], "zero_first");
+  assert.equal(validate(sched("km", [step(0, 2, "Gel", 25, false)])).steps[0], "zero_first");
+  assert.equal(validate(sched("km", [step(5, 30, "Gel", 25, false)])).steps[0], "total_max"); // 150 km through repeats
+  assert.equal(validate(sched("km", [step(50, 1, "Gel", 25, false), step(50, 1, "Gel", 25, false)])).steps[1], null); // exactly 100
+  assert.equal(validate(sched("min", [step(600, 1, "Gel", 25, false), step(5, 1, "Gel", 25, false)])).steps[1], "total_max");
+  assert.equal(validate(sched("km", [step(5, 1, "Gel", -1, false)])).steps[0], "carbs");
+  assert.equal(validate(sched("km", [step(5, 1, "Gel", 10000, false)])).steps[0], "carbs");
+  assert.equal(validate(sched("km", [step(5, 1, "Gel", 2.5, false)])).steps[0], "carbs");
+  assert.equal(validate(sched("km", [step(5, 1, "A".repeat(40), 25, false)])).steps[0], "field_long");
+  assert.equal(validate(sched("km", [step(5, 1, NaN, 25, false)])).steps[0], null); // text falls back to Gel
+  assert.equal(validate(sched("km", [step(NaN, 1, "Gel", 25, false)])).steps[0], "size_min");
+});
+
+test("validate: roundtrip warning when the text would be read differently", () => {
+  const v = validate(sched("km", [step(5, 1, "Maurten 100", 0, false), step(5, 1, "Gel caf", 0, false), step(5, 1, "Gel", 25, false)]));
+  assert.deepEqual(v.warnings, ["roundtrip", "roundtrip", null]);
+  assert.equal(v.ok, true); // warnings do not block
+});
+
+test("fields: 10 values, dash for unused, trimmed name", () => {
+  const f = fields(sched("min", [step(30, 1, "Gel", 25, false)], "  Long run "));
+  assert.equal(f.name, "Long run");
+  assert.equal(f.unit, "min");
+  assert.deepEqual(f.steps, ["30 Gel 25", "-", "-", "-", "-", "-", "-", "-"]);
+});
+
+test("moments: cumulative positions, numbering, totals", () => {
+  const m = moments(sched("km", [step(0, 1, "Gel", 25, false), step(10, 1, "Gel", 25, false), step(5, 3, "Gel", 25, false), step(5, 1, "Gel CAF", 25, true)]));
+  assert.deepEqual(m.rows.map(r => [r.at, r.label, r.carbs, r.caf, r.before]), [
+    [0, "Gel", 25, false, true],
+    [10, "Gel", 25, false, false],
+    [15, "Gel #1", 25, false, false],
+    [20, "Gel #2", 25, false, false],
+    [25, "Gel #3", 25, false, false],
+    [30, "Gel CAF", 25, true, false],
+  ]);
+  assert.equal(m.totalCarbs, 150);
+  assert.equal(m.count, 6);
+  assert.equal(m.cafCount, 1);
+  assert.equal(m.perHour, null);
+});
+
+test("moments: per hour on time schedules, decimals stay exact", () => {
+  const m = moments(sched("min", [step(30, 6, "Gel", 25, false)]));
+  assert.equal(m.rows[5].at, 180);
+  assert.equal(m.perHour, 50);
+  const k = moments(sched("km", [step(7.5, 2, "Gel", 20, false)]));
+  assert.deepEqual(k.rows.map(r => r.at), [7.5, 15]);
+  assert.equal(moments(sched("min", [])).perHour, null);
+});
+
+test("fromJSON: accepts a schedule, rejects garbage", () => {
+  const s = sched("km", [step(5, 3, "Gel", 25, true)], "Gel 5 km");
+  assert.deepEqual(fromJSON(JSON.stringify(s)), s);
+  for (const bad of [null, "", "nope", "{}", "[]", JSON.stringify({ name: "x", unit: "mi", steps: [] }), JSON.stringify({ name: "x", unit: "km", steps: "no" }), JSON.stringify({ name: 1, unit: "km", steps: [] })]) {
+    assert.equal(fromJSON(bad), null, String(bad));
+  }
+  const nine = fromJSON(JSON.stringify(sched("km", Array(9).fill(step(5, 1, "Gel", 25, false)))));
+  assert.equal(nine.steps.length, 8);
+  const loose = fromJSON(JSON.stringify({ name: "x", unit: "km", steps: [{ size: "5", repeat: "2", text: 7, carbs: "25", caf: 1 }] }));
+  assert.deepEqual(loose.steps[0], step(5, 2, "7", 25, true));
+});
+
+test("newStep", () => {
+  assert.deepEqual(newStep(), { size: 5, repeat: 1, text: "Gel", carbs: 25, caf: false });
 });
