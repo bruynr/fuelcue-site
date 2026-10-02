@@ -418,6 +418,8 @@ def plan(code):
   <h3>{t["plan_format_worked_h3"]}</h3>
   <p class="quote">{t["plan_format_worked_q"]}</p>
   <p>{t["plan_format_worked_a"]}</p>
+  <h3 class="note-h">{t["plan_note_h3"]}</h3>
+  <p class="note">{t["plan_note_p"]}</p>
 </div></section>
 </main>
 

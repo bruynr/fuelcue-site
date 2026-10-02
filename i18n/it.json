@@ -135,6 +135,8 @@
   "plan_format_worked_h3": "Esempio svolto",
   "plan_format_worked_q": "«Dammi un piano di rifornimento per un lungo di 32 km con gel, gel con caffeina e Dextro. Uso FuelSteps, cosa devo impostare?»",
   "plan_format_worked_a": "Una buona risposta imposta un piano in Garmin Connect: Nome <code>Lungo</code>, Unità <code>Distanza</code>, Passo 1 <code>0 Gel 25</code>, Passo 2 <code>10 Gel 25</code>, Passo 3 <code>5 Dextro 15</code>, Passo 4 <code>2x5 Gel 25</code>, Passo 5 <code>5 Gel CAF 25 caf</code>, Passi da 6 a 8 <code>-</code>. Momenti: gel prima della partenza, km 10 gel, km 15 Dextro, km 20 e 25 gel (#1, #2), km 30 gel con caffeina. Totale 140 g, 6 momenti, 1 con caffeina. L'avviso arriva per impostazione predefinita 50 m prima di ogni momento.",
+  "plan_note_h3": "Perché una pagina web?",
+  "plan_note_p": "FuelSteps era stato pensato per comporre i passi direttamente nell'app Connect IQ, e quella versione era quasi pronta. Garmin Connect al momento non riesce a salvare le impostazioni di tipo elenco delle app Connect IQ (un problema noto, confermato da Garmin), quindi per ora i campi passo sono testo. Questo creatore colma la lacuna. Appena Garmin lo risolverà, la composizione dei piani potrà tornare nell'app.",
   "plan_json_ld_name": "Creatore di piani FuelSteps",
   "footer_watches": "Forerunner, fēnix, epix, Enduro, MARQ, Venu e vívoactive con Connect IQ 5.0+",
   "not_affiliated": "Non affiliato a Garmin."

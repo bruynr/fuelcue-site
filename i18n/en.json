@@ -135,6 +135,8 @@
   "plan_format_worked_h3": "Worked example",
   "plan_format_worked_q": "“Give me a fuel plan for a 32 km run with gel, gel with caffeine and Dextro. I use FuelSteps, what do I set?”",
   "plan_format_worked_a": "A fitting answer sets one schedule in Garmin Connect: Name <code>Long run</code>, Unit <code>Distance</code>, Step 1 <code>0 Gel 25</code>, Step 2 <code>10 Gel 25</code>, Step 3 <code>5 Dextro 15</code>, Step 4 <code>2x5 Gel 25</code>, Step 5 <code>5 Gel CAF 25 caf</code>, Step 6 to 8 <code>-</code>. Moments: gel before the start, km 10 gel, km 15 Dextro, km 20 and 25 gel (#1, #2), km 30 caffeine gel. Total 140 g, 6 moments, 1 with caffeine. The alert comes 50 m before each moment by default.",
+  "plan_note_h3": "Why a web page?",
+  "plan_note_p": "FuelSteps was built to let you click your steps together right inside the Connect IQ app, and that version was nearly finished. Garmin Connect currently cannot save list-type settings for Connect IQ apps (a known issue Garmin has acknowledged), so the step fields are plain text for now. This builder fills that gap. Once Garmin resolves it, building schedules can move into the app.",
   "plan_json_ld_name": "FuelSteps plan builder",
   "footer_watches": "Forerunner, fēnix, epix, Enduro, MARQ, Venu and vívoactive with Connect IQ 5.0+",
   "not_affiliated": "Not affiliated with Garmin."
