@@ -75,6 +75,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 .plan-hero .lead { max-width: 640px; }
 .builder { padding-top: 40px; }
 .builder-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: start; }
+.builder-grid > * { min-width: 0; } /* grid items may shrink below their content, so the steps table scrolls instead of widening the page */
 .h3 { font-size: 24px; letter-spacing: -.5px; margin: 28px 0 12px; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; align-items: end; }
 .field-row label, .steps-table td label { display: block; font-size: 14px; font-weight: 700; color: var(--muted); }
@@ -110,5 +111,10 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 .examples td:first-child { white-space: nowrap; width: 230px; }
 @media (max-width: 820px) {
   .builder-grid { grid-template-columns: 1fr; } .field-row { grid-template-columns: 1fr; }
-  .steps-table td.num { width: 70px; } .examples td:first-child { white-space: normal; width: auto; }
+  .scroll-x { overflow-x: auto; margin: 0 -8px; padding: 0 8px; }
+  .steps-table td, .steps-table th { padding: 6px 3px; }
+  .steps-table td.num { width: 62px; } .steps-table td.caf { width: 40px; } .steps-table td.act { width: auto; }
+  .steps-table input[type=number], .steps-table input[type=text] { padding: 8px 6px; font-size: 15px; }
+  .icon-btn { width: 28px; height: 28px; font-size: 14px; margin-left: 2px; }
+  .examples td:first-child { white-space: normal; width: auto; }
 }
