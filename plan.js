@@ -19,7 +19,7 @@ const el = (tag, attrs = {}, ...children) => {
 };
 const fmt = (s, vars) => s.replace(/\{(\w+)\}/g, (_, k) => vars[k]);
 const numText = (n) => Number(n).toLocaleString(lang, { maximumFractionDigits: 2 });
-const track = (name, data) => { if (typeof window.umami !== "undefined") window.umami.track(name, data); };
+const track = (name, data) => { if (typeof window.umami !== "undefined") window.umami.track(name, { ...data, lang }); }; // page language, so events can be split per language
 
 // storage may be blocked (site data off, private mode): the builder still works, it just forgets on reload
 let saved = null;

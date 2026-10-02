@@ -67,7 +67,7 @@ Layout (two columns on desktop, stacked on mobile):
 - Umami Cloud script tag on all pages, replacing the Cloudflare beacon in `ANALYTICS` in `build.py`; website id `458f80aa-006c-4354-9a7b-8bdda8850cbd` in a constant `UMAMI_ID`, script `https://cloud.umami.is/script.js` with `defer` and `data-website-id`.
 - Events only on the plan page, via `umami.track(name, data)` guarded by `typeof umami !== "undefined"`:
   - `plan_template` `{id}`
-  - `plan_copy` `{field: "name" | "unit" | "step1" … "step8", unit: "km" | "min", steps: n}`
+  - `plan_copy` `{field: "step1" … "step8", unit: "km" | "min", steps: n}`; every event also carries `lang` (page language)
   - `plan_copy_all` `{unit, steps}`
 - No personal data, no schedule contents, no cookies; the privacy line in the footer stays valid ("no account, no cookies").
 
