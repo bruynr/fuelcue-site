@@ -8,7 +8,7 @@ Garmin Connect only offers plain text fields for FuelSteps schedules (array sett
 
 1. **Settings format reference**: a precise, plainly worded description of the 10 settings fields per schedule and the step syntax, as normal HTML page text and in `llms-full.txt`, so that a human or an AI assistant (ChatGPT, Claude, Copilot, …) that reads the site can produce correct settings.
 2. **Plan builder**: a page where a runner clicks a schedule together, sees the resulting moments and copies the generated field values into Garmin Connect.
-3. **Usage analytics**: Umami (cookieless, no consent banner) for custom events in the builder. Cloudflare Web Analytics stays for page views.
+3. **Usage analytics**: Umami (cookieless, no consent banner) for page views, referrers, countries and custom events in the builder. It replaces Cloudflare Web Analytics, which would only duplicate the page views.
 
 Success: a user who asks their AI "give me a fuel plan with gel, gel caf and dextro, I use FuelSteps, what do I set?" gets 10 field values that paste without error; a user of the builder never types the syntax by hand; the Umami dashboard shows which templates, units and field copies are used.
 
@@ -42,7 +42,7 @@ Content, source of truth = `ScheduleParser.mc` in the app repo:
 
 ## 3. Builder
 
-Vanilla JavaScript in `plan.js` (one file, no framework, no build step), loaded only on the plan page; all UI strings come from `i18n` and are injected into the HTML by `build.py`, `plan.js` reads them from `data-` attributes or an inline JSON block, so the script itself is language-neutral.
+Vanilla JavaScript in two files (no framework, no build step): `plan-core.js` with the pure logic (ES module, also imported by the Node tests) and `plan.js` with the DOM code, loaded only on the plan page; all UI strings come from `i18n` and are injected into the HTML by `build.py`, `plan.js` reads them from `data-` attributes or an inline JSON block, so the script itself is language-neutral.
 
 Layout (two columns on desktop, stacked on mobile):
 
@@ -60,11 +60,11 @@ Layout (two columns on desktop, stacked on mobile):
 
 **State**: the current schedule is kept in `localStorage` (`fuelsteps-plan`) so a reload keeps it; first visit loads the "Gel 5 km" template.
 
-**Core logic** (pure functions, exported for tests): `parseStepText(raw)` mirroring the Monkey C function token for token (repeat/size/text/carbs/caf, `-1`/`-2` x handling, 1–4 digit whole numbers, one `.`/`,` decimal), `validate(schedule)` with the rules above, `format(step)` producing the shortest canonical field text (`3x5 Gel 25 caf`, repeat omitted when 1, carbs omitted when 0, text omitted when `Gel`), `moments(schedule)` producing the preview rows and totals. Round trip `parse(format(step))` equals the step.
+**Core logic** (pure functions, exported for tests): `parseStepText(raw)` mirroring the Monkey C function token for token (repeat/size/text/carbs/caf, `-1`/`-2` x handling, 1–4 digit whole numbers, one `.`/`,` decimal), `validate(schedule)` with the rules above, `formatStep(step)` producing the canonical field text (`3x5 Gel 25 caf`: repeat omitted when 1, carbs omitted when 0, text always written so the line stays readable), `moments(schedule)` producing the preview rows and totals. Round trip `parse(format(step))` equals the step.
 
 ## 4. Analytics
 
-- Umami Cloud script tag on all pages next to the Cloudflare beacon, in `ANALYTICS` in `build.py`; website id `458f80aa-006c-4354-9a7b-8bdda8850cbd` in a constant `UMAMI_ID`, script `https://cloud.umami.is/script.js` with `defer` and `data-website-id`.
+- Umami Cloud script tag on all pages, replacing the Cloudflare beacon in `ANALYTICS` in `build.py`; website id `458f80aa-006c-4354-9a7b-8bdda8850cbd` in a constant `UMAMI_ID`, script `https://cloud.umami.is/script.js` with `defer` and `data-website-id`.
 - Events only on the plan page, via `umami.track(name, data)` guarded by `typeof umami !== "undefined"`:
   - `plan_template` `{id}`
   - `plan_copy` `{field: "name" | "unit" | "step1" … "step8", unit: "km" | "min", steps: n}`
