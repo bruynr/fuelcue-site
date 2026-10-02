@@ -21,45 +21,97 @@ const fmt = (s, vars) => s.replace(/\{(\w+)\}/g, (_, k) => vars[k]);
 const numText = (n) => Number(n).toLocaleString(lang, { maximumFractionDigits: 2 });
 const track = (name, data) => { if (typeof window.umami !== "undefined") window.umami.track(name, data); };
 
-let schedule = fromJSON(localStorage.getItem(STORAGE)) || structuredClone(TEMPLATES[0].schedule);
+// storage may be blocked (site data off, private mode): the builder still works, it just forgets on reload
+let saved = null;
+try { saved = localStorage.getItem(STORAGE); } catch (e) { /* no storage */ }
+let schedule = fromJSON(saved) || structuredClone(TEMPLATES[0].schedule);
 
 function save() {
-  try { localStorage.setItem(STORAGE, JSON.stringify(schedule)); } catch (e) { /* private mode: builder still works */ }
+  try { localStorage.setItem(STORAGE, JSON.stringify(schedule)); } catch (e) { /* no storage */ }
+}
+
+// no clipboard API (http, old browser): copy through a hidden textarea and the legacy command
+function legacyCopy(text) {
+  const ta = el("textarea", { readonly: true, style: "position:fixed;left:-9999px;top:0", "aria-hidden": "true" });
+  ta.value = text;
+  document.body.append(ta);
+  ta.select();
+  let ok = false;
+  try { ok = document.execCommand("copy"); } catch (e) { /* not supported */ }
+  ta.remove();
+  return ok;
 }
 
 async function copyText(text, button) {
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch (e) {
-    // no clipboard API (http, old browser): select the value so the user can press Ctrl+C
-    const code = button.parentElement.querySelector("code");
-    if (code) { const r = document.createRange(); r.selectNodeContents(code); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); }
-  }
-  const label = button.textContent;
-  button.textContent = S.copied; button.classList.add("done");
-  setTimeout(() => { button.textContent = label; button.classList.remove("done"); }, 1200);
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { ok = legacyCopy(text); }
+  button.dataset.label ??= button.textContent; // the original label survives repeated clicks
+  button.textContent = ok ? S.copied : S.copy_failed;
+  button.classList.toggle("done", ok);
+  setTimeout(() => { button.textContent = button.dataset.label; button.classList.remove("done"); }, ok ? 1200 : 2500);
 }
 
 function stepInput(type, value, attrs, onChange) {
   return el("input", { type, value, ...attrs, oninput: (e) => { onChange(e.target); render(); } });
 }
 
+// move a step to another position, rebuild, and put focus back on its handle
+function moveStep(from, to) {
+  if (to < 0 || to >= schedule.steps.length || to === from) return;
+  const [s] = schedule.steps.splice(from, 1);
+  schedule.steps.splice(to, 0, s);
+  render(true);
+  $("plan-steps").querySelectorAll("tr")[to]?.querySelector(".handle button")?.focus();
+}
+
+// drag a row by its handle (mouse, touch, pen); while dragging only the DOM rows move, the schedule changes on release
+function startDrag(e, tr) {
+  if (e.button !== 0 && e.pointerType === "mouse") return;
+  e.preventDefault();
+  const body = $("plan-steps");
+  const from = [...body.children].indexOf(tr);
+  const handle = e.currentTarget;
+  handle.setPointerCapture(e.pointerId);
+  tr.classList.add("dragging");
+  const move = (ev) => {
+    const rows = [...body.children];
+    const over = rows.find((r) => r !== tr && ev.clientY >= r.getBoundingClientRect().top && ev.clientY <= r.getBoundingClientRect().bottom);
+    if (!over) return;
+    const before = ev.clientY < over.getBoundingClientRect().top + over.getBoundingClientRect().height / 2;
+    body.insertBefore(tr, before ? over : over.nextSibling);
+  };
+  const end = () => {
+    handle.removeEventListener("pointermove", move);
+    handle.removeEventListener("pointerup", end);
+    handle.removeEventListener("pointercancel", end);
+    tr.classList.remove("dragging");
+    const to = [...body.children].indexOf(tr);
+    if (to !== from) moveStep(from, to); else render(true);
+  };
+  handle.addEventListener("pointermove", move);
+  handle.addEventListener("pointerup", end);
+  handle.addEventListener("pointercancel", end);
+}
+
 function renderSteps(v) {
   const body = $("plan-steps");
   body.replaceChildren();
   const lim = LIMITS[schedule.unit];
+  const unit = S[schedule.unit];
   schedule.steps.forEach((s, i) => {
     const bad = v.steps[i] !== null;
-    const tr = el("tr", { class: bad ? "bad" : "" },
-      el("td", { class: "num" }, stepInput("number", s.repeat, { min: 1, max: LIMITS.repeatMax, step: 1, "aria-label": S.col_repeat }, (t) => { s.repeat = t.valueAsNumber; })),
-      el("td", { class: "num" }, stepInput("number", s.size, { min: 0, max: lim.max, step: lim.step, "aria-label": S.col_size + " (" + S[schedule.unit] + ")" }, (t) => { s.size = t.valueAsNumber; })),
-      el("td", {}, stepInput("text", s.text, { maxlength: LIMITS.fieldMax, "aria-label": S.col_text }, (t) => { s.text = t.value; })),
-      el("td", { class: "num" }, stepInput("number", s.carbs, { min: 0, max: LIMITS.carbsMax, step: 1, "aria-label": S.col_carbs }, (t) => { s.carbs = t.valueAsNumber; })),
-      el("td", { class: "caf" }, el("input", { type: "checkbox", checked: s.caf, "aria-label": S.col_caf, onchange: (e) => { s.caf = e.target.checked; render(); } })),
-      el("td", { class: "act" },
-        el("button", { class: "icon-btn", type: "button", title: S.up, "aria-label": S.up, disabled: i === 0, onclick: () => { [schedule.steps[i - 1], schedule.steps[i]] = [schedule.steps[i], schedule.steps[i - 1]]; render(); } }, "↑"),
-        el("button", { class: "icon-btn", type: "button", title: S.down, "aria-label": S.down, disabled: i === schedule.steps.length - 1, onclick: () => { [schedule.steps[i + 1], schedule.steps[i]] = [schedule.steps[i], schedule.steps[i + 1]]; render(); } }, "↓"),
-        el("button", { class: "icon-btn", type: "button", title: S.delete, "aria-label": S.delete, onclick: () => { schedule.steps.splice(i, 1); render(); } }, "✕")));
+    const tr = el("tr", { class: bad ? "bad" : "" });
+    const handle = el("button", { class: "grip", type: "button", title: S.drag, "aria-label": S.drag,
+      onkeydown: (e) => { if (e.key === "ArrowUp") { e.preventDefault(); moveStep(i, i - 1); } if (e.key === "ArrowDown") { e.preventDefault(); moveStep(i, i + 1); } } }, "⋮⋮");
+    handle.addEventListener("pointerdown", (e) => startDrag(e, tr));
+    tr.append(
+      el("td", { class: "handle" }, handle),
+      el("td", { class: "rep", "data-label": S.col_repeat }, stepInput("number", s.repeat, { min: 1, max: LIMITS.repeatMax, step: 1, "aria-label": S.col_repeat }, (t) => { s.repeat = t.valueAsNumber; })),
+      el("td", { class: "size", "data-label": S.col_size + " (" + unit + ")" }, stepInput("number", s.size, { min: 0, max: lim.max, step: lim.step, "aria-label": S.col_size + " (" + unit + ")" }, (t) => { s.size = t.valueAsNumber; })),
+      el("td", { class: "text", "data-label": S.col_text }, stepInput("text", s.text, { maxlength: LIMITS.fieldMax, "aria-label": S.col_text }, (t) => { s.text = t.value; })),
+      el("td", { class: "carbs", "data-label": S.col_carbs }, stepInput("number", s.carbs, { min: 0, max: LIMITS.carbsMax, step: 1, "aria-label": S.col_carbs }, (t) => { s.carbs = t.valueAsNumber; })),
+      el("td", { class: "caf", "data-label": S.col_caf }, el("input", { type: "checkbox", checked: s.caf, "aria-label": S.col_caf, onchange: (e) => { s.caf = e.target.checked; render(); } })),
+      el("td", { class: "del" }, el("button", { class: "icon-btn", type: "button", title: S.delete, "aria-label": S.delete, onclick: () => { schedule.steps.splice(i, 1); render(true); } }, "✕")));
     body.append(tr);
   });
   $("plan-add").disabled = schedule.steps.length >= LIMITS.maxSteps;
@@ -74,12 +126,13 @@ function renderErrors(v) {
   v.warnings.forEach((w, i) => { if (w) ul.append(el("li", { class: "warn" }, fmt(S.field_step, { n: i + 1 }) + ": " + S["warn_" + w])); });
 }
 
+// the 10 Garmin Connect fields; name and unit are typed/picked in the app, only the step lines get a copy button
 function fieldRows() {
   const f = fields(schedule);
   return [
-    { key: "name", label: S.name, value: f.name },
-    { key: "unit", label: S.unit, value: S["unit_" + f.unit] },
-    ...f.steps.map((v, i) => ({ key: "step" + (i + 1), label: fmt(S.field_step, { n: i + 1 }), value: v })),
+    { key: "name", label: S.name, value: f.name, copy: false },
+    { key: "unit", label: S.unit, value: S["unit_" + f.unit], copy: false },
+    ...f.steps.map((v, i) => ({ key: "step" + (i + 1), label: fmt(S.field_step, { n: i + 1 }), value: v, copy: true })),
   ];
 }
 
@@ -87,11 +140,17 @@ function renderFields() {
   const ol = $("plan-fields");
   ol.replaceChildren();
   for (const r of fieldRows()) {
-    const btn = el("button", { class: "copy", type: "button", onclick: (e) => {
-      copyText(r.value, e.currentTarget);
-      track("plan_copy", { field: r.key, unit: schedule.unit, steps: schedule.steps.length });
-    } }, S.copy);
-    ol.append(el("li", {}, el("span", { class: "lbl" }, r.label), el("code", { class: r.value === "-" ? "dash" : "" }, r.value), btn));
+    const li = el("li", {}, el("span", { class: "lbl" }, r.label));
+    if (r.copy) {
+      li.append(el("code", { class: r.value === "-" ? "dash" : "" }, r.value),
+        el("button", { class: "copy", type: "button", onclick: (e) => {
+          copyText(r.value, e.currentTarget);
+          track("plan_copy", { field: r.key, unit: schedule.unit, steps: schedule.steps.length });
+        } }, S.copy));
+    } else {
+      li.append(el("span", { class: "val" }, r.value));
+    }
+    ol.append(li);
   }
 }
 
@@ -113,12 +172,13 @@ function renderMoments() {
   $("plan-totals").textContent = m.rows.length ? parts.join(" · ") : "";
 }
 
-function render() {
+// rebuild = true after a structural change (move, delete): the row buttons hold focus, but the table must follow the schedule
+function render(rebuild = false) {
   const v = validate(schedule);
   if (document.activeElement !== $("plan-name")) $("plan-name").value = schedule.name;
   document.querySelectorAll('#plan-unit input[name="unit"]').forEach((r) => { r.checked = r.value === schedule.unit; });
-  // rebuild the table only when focus is outside it, so typing in a step keeps its input; otherwise refresh the row state
-  if (!document.activeElement || !$("plan-steps").contains(document.activeElement)) renderSteps(v);
+  // while typing in a step input the table is not rebuilt, so the input keeps focus and its half-typed value; the row state is refreshed in place
+  if (rebuild || !document.activeElement || !$("plan-steps").contains(document.activeElement)) renderSteps(v);
   else $("plan-steps").querySelectorAll("tr").forEach((tr, i) => tr.classList.toggle("bad", v.steps[i] !== null));
   renderErrors(v);
   renderFields();
@@ -129,11 +189,13 @@ function render() {
 $("plan-name").addEventListener("input", (e) => { schedule.name = e.target.value; render(); });
 document.querySelectorAll('#plan-unit input[name="unit"]').forEach((r) => r.addEventListener("change", (e) => { schedule.unit = e.target.value; render(); }));
 $("plan-template").addEventListener("change", (e) => {
-  const tpl = TEMPLATES.find((t) => t.id === e.target.value);
-  if (schedule.steps.length && !confirm(S.template_confirm)) { e.target.value = ""; return; }
-  schedule = tpl ? structuredClone(tpl.schedule) : { name: "", unit: schedule.unit, steps: [] };
-  if (tpl) track("plan_template", { id: tpl.id });
+  const choice = e.target.value; // "" = the placeholder, "empty" = start blank, otherwise a template id
   e.target.value = "";
+  if (!choice) return;
+  const tpl = TEMPLATES.find((t) => t.id === choice);
+  if (schedule.steps.length && !confirm(S.template_confirm)) return;
+  schedule = tpl ? structuredClone(tpl.schedule) : { name: "", unit: schedule.unit, steps: [] };
+  track("plan_template", { id: choice });
   render();
 });
 $("plan-add").addEventListener("click", () => { schedule.steps.push(newStep()); render(); });

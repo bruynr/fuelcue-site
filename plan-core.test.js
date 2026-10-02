@@ -162,3 +162,12 @@ test("fromJSON: accepts a schedule, rejects garbage", () => {
 test("newStep", () => {
   assert.deepEqual(newStep(), { size: 5, repeat: 1, text: "Gel", carbs: 25, caf: false });
 });
+
+test("moments and fields ignore steps the watch would reject (unbounded repeat, empty size)", () => {
+  const huge = moments(sched("km", [step(5, 3000000, "Gel", 25, false), step(5, 1, "Gel", 25, false)]));
+  assert.deepEqual(huge.rows.map(r => r.at), [5]); // the invalid step adds no rows, the valid one still counts from 0
+  const empty = moments(sched("km", [step(NaN, 1, "Gel", 25, false), step(5, 2, "Gel", 25, false)]));
+  assert.deepEqual(empty.rows.map(r => r.at), [5, 10]);
+  assert.equal(moments(sched("km", [step(5, 1.5, "Gel", 25, false)])).rows.length, 0);
+  assert.equal(formatStep(step(NaN, 1, "Gel", 25, false)), "? Gel 25"); // shown while a field is empty, never a valid line
+});

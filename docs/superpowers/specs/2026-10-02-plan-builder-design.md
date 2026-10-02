@@ -28,7 +28,7 @@ Section on the plan page (below the builder, with an anchor `#format`) and verba
 
 Content, source of truth = `ScheduleParser.mc` in the app repo:
 
-- In Garmin Connect (Connect IQ app → My data fields → FuelSteps → Settings) each schedule has 10 fields: **Name** (max 16 characters), **Unit** (Distance = km, Time = min) and **Step 1 … Step 8** (text, max 40 characters). Unused step fields must contain `-` (Garmin Connect cannot save an empty text field). Fields are read in order; the first `-` or blank field ends the schedule.
+- In Garmin Connect (Connect IQ app → My data fields → FuelSteps → Settings) each schedule has 10 fields: **Name** (max 16 characters), **Unit** (Distance = km, Time = min) and **Step 1 … Step 8** (text, max 40 characters). Unused step fields must contain `-` (Garmin Connect cannot save an empty text field). Dashed or blank fields are skipped (`ScheduleStore.load`), so every unused field needs a dash.
 - One step field = `[Nx] size [text] [carbs[g]] [caf]`, separated by spaces, in this order:
   - `Nx` repeat, optional, 1–30 (`3x5` = three times 5 km/min); the step is numbered `#1 … #N` on the watch.
   - `size` distance or time **after the previous moment**: km with unit Distance, minutes with unit Time; decimals with `.` or `,`; minimum 0.5 km / 5 min; the running total of the schedule may not exceed 100 km / 600 min.
@@ -49,11 +49,11 @@ Layout (two columns on desktop, stacked on mobile):
 **Left, input**
 - Name (text, max 16), Unit (segmented km / min).
 - Template select: "Gel 5 km" (`3x5 Gel 25 caf`), "Marathon 7 km" (`0 Gel 25`, `7 Gel 25`, `7 Dextro 15`, `7 Gel CAF 25 caf`, `2x7 Gel 25`), "Every 30 min" (time, `6x30 Gel 25`). Picking a template replaces the current steps (confirm when steps exist).
-- Step rows (max 8): repeat (number 1–30, default 1), size (number, step 0.5 or 5), text (free), carbs (number, g), caffeine (checkbox), move up/down, delete. "Add step" button, disabled at 8.
+- Step rows (max 8): repeat (number 1–30, default 1), size (number, step 0.5 or 5), text (free), carbs (number, g), caffeine (checkbox), a drag handle to reorder (pointer drag on mouse/touch, arrow keys on the keyboard), delete. On narrow screens a row stacks into two lines (text + delete, then repeat/size/carbs/caffeine with small labels) instead of scrolling sideways. "Add step" button, disabled at 8.
 - Live validation per row with the same rules as the watch, messages from i18n: below minimum, total above maximum, 0 only in step 1 without repeat, field longer than 40 characters, name longer than 16; hint when the last word of the text is a number.
 
 **Right, output**
-- The 10 Garmin Connect fields as labelled rows (Name, Unit, Step 1 … Step 8), each with a copy button; unused steps show `-`. Copy uses `navigator.clipboard.writeText` with a "Copied" flash.
+- The 10 Garmin Connect fields as labelled rows (Name, Unit, Step 1 … Step 8), the step lines each with a copy button, name and unit as plain text (they are typed and picked in the Connect IQ app); unused steps show `-`. Copy uses `navigator.clipboard.writeText`, falls back to a hidden textarea with `execCommand("copy")`, and shows "Copied" only on success.
 - "Copy all" copies the ten lines as `Label: value` text, for pasting into notes or an AI chat.
 - Moments preview: table with planned moment (km 5 / min 30), label with `#n` numbering, grams, caffeine mark; footer with total grams, number of moments, number of caffeine moments; for time schedules also g/h (total g / total h). Before-start step shown as "before start".
 - Short line under the output: where to paste (Connect IQ → My data fields → FuelSteps → Settings → Save), then pick the schedule on the watch.

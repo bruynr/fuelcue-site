@@ -373,13 +373,13 @@ def plan(code):
           <label><input type="radio" name="unit" value="km"> {t["plan_unit_km"]} ({t["plan_km"]})</label>
           <label><input type="radio" name="unit" value="min"> {t["plan_unit_min"]} ({t["plan_min"]})</label>
         </fieldset>
-        <label>{t["plan_template"]}<select id="plan-template"><option value="">{t["plan_template_blank"]}</option>{tpl_opts}</select></label>
+        <label>{t["plan_template"]}<select id="plan-template"><option value="">{t["plan_template_pick"]}</option><option value="empty">{t["plan_template_blank"]}</option>{tpl_opts}</select></label>
       </div>
       <h2 class="h3">{t["plan_steps_h2"]}</h2>
-      <div class="scroll-x"><table class="steps-table">
-        <thead><tr><th>{t["plan_col_repeat"]}</th><th>{t["plan_col_size"]}</th><th>{t["plan_col_text"]}</th><th>{t["plan_col_carbs"]}</th><th>{t["plan_col_caf"]}</th><th></th></tr></thead>
+      <table class="steps-table">
+        <thead><tr><th></th><th>{t["plan_col_repeat"]}</th><th>{t["plan_col_size"]}</th><th>{t["plan_col_text"]}</th><th>{t["plan_col_carbs"]}</th><th>{t["plan_col_caf"]}</th><th></th></tr></thead>
         <tbody id="plan-steps"></tbody>
-      </table></div>
+      </table>
       <button id="plan-add" class="btn dark" type="button">{t["plan_add"]}</button>
       <ul id="plan-errors" class="errors"></ul>
     </div>

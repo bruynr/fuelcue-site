@@ -57,7 +57,7 @@ export function parseStepText(raw) {
 }
 
 function num(n) {
-  return String(Math.round(n * 100) / 100); // 7.5 → "7.5", 5 → "5"
+  return Number.isFinite(n) ? String(Math.round(n * 100) / 100) : "?"; // 7.5 → "7.5", 5 → "5", empty field → "?"
 }
 
 // step → canonical field text: repeat omitted when 1, carbs omitted when 0, text always written
@@ -126,11 +126,15 @@ export function fields(schedule) {
   return { name: String(schedule.name ?? "").trim(), unit: schedule.unit, steps };
 }
 
-// every alert moment with its cumulative position; "#n" numbering inside a repeated step
+// a step the watch could run at all: whole repeat within the limit and a number as size (keeps the preview bounded while typing)
+const runnable = (s) => Number.isInteger(s.repeat) && s.repeat >= 1 && s.repeat <= LIMITS.repeatMax && Number.isFinite(Number(s.size));
+
+// every alert moment with its cumulative position; "#n" numbering inside a repeated step; steps that are not runnable are skipped
 export function moments(schedule) {
   const rows = [];
   let at = 0, totalCarbs = 0, cafCount = 0;
   schedule.steps.forEach((s, i) => {
+    if (!runnable(s)) return;
     const text = normText(s.text);
     for (let n = 1; n <= s.repeat; n++) {
       at = Math.round((at + Number(s.size)) * 1000) / 1000;
