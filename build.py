@@ -182,6 +182,7 @@ def page(code):
 <header><div class="wrap">
   <img src="{up}{WEB}icon-192.png" alt="" width="38" height="38"><b>FuelSteps</b>
   <nav class="langs" aria-label="Language">{langs}</nav>
+  <a class="btn ghost" href="plan/">{t["plan_nav"]}</a>
   <a class="btn ghost" href="{donate}" data-donate>{t["nav_donate"]}</a>
   <span class="btn soon">{t["nav_soon"]}</span>
 </div></header>
@@ -193,6 +194,7 @@ def page(code):
     <h1>{t["hero_h1"]}</h1>
     <p class="lead">{t["hero_lead"]}</p>
     <div class="ctas">
+      <a class="btn dark" href="plan/">{t["plan_cta"]}</a>
       <span class="btn soon">{t["hero_soon"]}</span>
       <a class="btn amber" href="{donate}" data-donate>{t["hero_gel"]}</a>
     </div>
@@ -426,12 +428,13 @@ def plan(code):
 
 def sitemap():
     today = date.today().isoformat()
-    alt = "".join(f'\n    <xhtml:link rel="alternate" hreflang="{c}" href="{BASE + path(c)}"/>' for c in ORDER)
-    alt += f'\n    <xhtml:link rel="alternate" hreflang="x-default" href="{BASE}"/>'
-    urls = "".join(f"\n  <url>\n    <loc>{BASE + path(c)}</loc>\n    <lastmod>{today}</lastmod>{alt}\n  </url>" for c in ORDER)
+    def entry(sub):
+        alt = "".join(f'\n    <xhtml:link rel="alternate" hreflang="{c}" href="{BASE}{path(c)}{sub}"/>' for c in ORDER)
+        alt += f'\n    <xhtml:link rel="alternate" hreflang="x-default" href="{BASE}{sub}"/>'
+        return "".join(f"\n  <url>\n    <loc>{BASE}{path(c)}{sub}</loc>\n    <lastmod>{today}</lastmod>{alt}\n  </url>" for c in ORDER)
     return ('<?xml version="1.0" encoding="UTF-8"?>\n'
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'
-            f"{urls}\n</urlset>\n")
+            f"{entry('')}{entry('plan/')}\n</urlset>\n")
 
 
 def llms():
@@ -446,12 +449,14 @@ def llms():
 - Price: free, no subscription, no ads, no account; donations: {PLAIN_DONATE}
 - Watches: round Garmin watches with Connect IQ 5.0+ (Forerunner 165–970, fēnix 7/8/9/E, epix Gen 2/Pro, Enduro 3, MARQ Gen 2, Venu 2/3/4, vívoactive 5/6)
 - Schedules: up to 5, each a chain of steps by distance (km) or time (min) with repeats; per step a name, grams of carbs and a caffeine mark
+- Settings format (Garmin Connect, per schedule: Name, Unit, Step 1–8): one step field = `[Nx] size [text] [carbs[g]] [caf]`, e.g. `3x5 Gel 25 caf`; unused fields `-`; full reference and plan builder: {BASE}plan/#format
 - Alert: vibration, tone and full screen, 30 s / 50 m before the planned moment by default
 - Data: planned carbs, carbs per hour, fuel and caffeine moments saved in the activity (Garmin Connect charts)
 - Languages: English, Dutch, German, French, Spanish, Italian
 
 ## Pages
 {pages}
+- [Plan builder and settings format]({BASE}plan/)
 - [Full text (English)]({BASE}llms-full.txt)
 
 ## FAQ
@@ -494,6 +499,25 @@ def not_found():
 """
 
 
+# the settings format reference as markdown (English), for llms-full.txt
+def format_section():
+    t = T["en"]
+    items = "\n".join(f"- {strip(i)}" for i in t["plan_format_li"])
+    examples = "\n".join(f"- `{c}`: {d}" for c, d in t["plan_format_examples"])
+    return f"""## {t["plan_format_h2"]}
+{strip(t["plan_format_lead"])} Plan builder: {BASE}plan/
+
+{items}
+
+### {t["plan_format_examples_h3"]}
+{examples}
+
+### {t["plan_format_worked_h3"]}
+{t["plan_format_worked_q"]}
+{strip(t["plan_format_worked_a"])}
+"""
+
+
 # the whole English page as plain markdown, for AI crawlers
 def llms_full():
     t = T["en"]
@@ -519,6 +543,7 @@ Example schedule ({t["card_title"]}):
 - 7 km: Gel CAF, 25 g, {t["tag_caf"]}
 - 2× 7 km: Gel, 25 g (Gel #1, Gel #2)
 
+{format_section()}
 ## {strip(t["alert_h2"])}
 {strip(t["alert_lead"])}
 
@@ -570,7 +595,7 @@ def indexnow():
     import urllib.request
     host = BASE.split("/")[2]
     body = {"host": host, "key": INDEXNOW_KEY, "keyLocation": f"{BASE}{INDEXNOW_KEY}.txt",
-            "urlList": [BASE + path(c) for c in ORDER]}
+            "urlList": [BASE + path(c) + sub for sub in ("", "plan/") for c in ORDER]}
     req = urllib.request.Request("https://api.indexnow.org/indexnow", data=json.dumps(body).encode(),
                                  headers={"Content-Type": "application/json; charset=utf-8"})
     with urllib.request.urlopen(req, timeout=30) as r:

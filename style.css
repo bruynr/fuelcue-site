@@ -50,6 +50,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 @media (max-width: 820px) {
   .split { grid-template-columns: 1fr; } .split.rev > :first-child { order: 0; }
   section { padding: 60px 0; } header .btn.soon { display: none; } header .langs { display: none; }
+  header .btn { padding: 9px 14px; font-size: 15px; }
   .langs-foot { display: flex; }
 }
 .langs { display: flex; gap: 4px; margin-right: 8px; }

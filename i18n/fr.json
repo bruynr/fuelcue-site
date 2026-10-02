@@ -33,7 +33,7 @@
   "full": "Plein", "half": "Moitié", "quarter": "Quart",
   "start_kicker": "C'est parti",
   "start_h2": "Prêt en <em>une minute.</em>",
-  "steps": ["Installe FuelSteps depuis le Connect IQ Store et ajoute-le à un écran de données de ton profil course.", "Active <b>Alertes → Connect IQ</b> dans les paramètres de l'activité.", "Modifie tes plans dans l'app Connect IQ : FuelSteps → Paramètres. Le plan 1 fonctionne tout de suite (6× 30 min Gel).", "Choisis un plan sur la montre : menu de l'activité → champs Connect IQ → FuelSteps."],
+  "steps": ["Installe FuelSteps via l'app Connect IQ sur ton téléphone ; après la synchronisation, la montre propose de l'installer : choisis l'activité course › OK.", "Autorise l'alerte sur la montre : paramètres de l'activité › <b>Alertes › Ajouter › Connect IQ › FuelSteps › Activé</b> (la montre le demande parfois dès l'installation).", "Modifie tes plans dans l'app Connect IQ : Mes champs de données › FuelSteps › Paramètres › Enregistrer. Le plan 1 « Gel 5 km » est prêt (3× 5 km, gel de 25 g avec caféine). <a href=\"plan/\">Compose ton propre plan</a> et copie les champs.", "Choisis un plan sur la montre avant la course : maintiens UP › Champs Connect IQ › FuelSteps. Sans choix, rien ne se déclenche."],
   "after_kicker": "Après ta course",
   "after_h2": "Dans <em>Garmin Connect.</em>",
   "after_li": ["Graphiques : glucides jusqu'ici et par heure", "Résumé : glucides au total, ravitaillements, prises de caféine et plan", "Valeurs prévues : FuelSteps te rappelle, tu n'as jamais à appuyer sur un bouton"],
