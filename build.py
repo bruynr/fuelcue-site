@@ -300,7 +300,8 @@ def page(code):
 <div class="overlay" id="donate-overlay" hidden>
   <div class="overlay-box" role="dialog" aria-modal="true" aria-labelledby="donate-title">
     <button class="overlay-close" aria-label="{esc(t["donate_close"])}">✕</button>
-    <h3 id="donate-title">{esc(t["donate_title"])}</h3>{donate_btns}
+    <h3 id="donate-title">{esc(t["donate_title"])}</h3>
+    <p class="donate-text">{esc(t["donate_text"])}</p>{donate_btns}
   </div>
 </div>
 

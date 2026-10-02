@@ -68,6 +68,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 .overlay-box { position: relative; background: #fff; border-radius: 24px; padding: 38px 34px 34px; max-width: 430px; width: 100%; text-align: center;
                box-shadow: 0 24px 60px rgba(0, 0, 0, .3); }
 .overlay-box h3 { font-size: 24px; letter-spacing: -.5px; margin-bottom: 10px; }
+.donate-text { color: var(--muted); font-size: 17px; margin-bottom: 6px; }
 .overlay-box .btn { display: block; margin-top: 12px; }
 .overlay-close { position: absolute; top: 14px; right: 18px; border: 0; background: none; font-size: 20px; cursor: pointer; color: var(--muted); }
 /* plan builder */
