@@ -61,7 +61,7 @@ DONATE_JS = """<script>
 
 # Umami Cloud: page views, referrers, countries and the builder events; cookieless, no personal data, so no consent banner
 UMAMI_ID = "458f80aa-006c-4354-9a7b-8bdda8850cbd"
-ANALYTICS = f'<script defer src="https://cloud.umami.is/script.js" data-website-id="{UMAMI_ID}"></script>'
+ANALYTICS = f'<script defer src="https://cloud.umami.is/script.js" data-website-id="{UMAMI_ID}" data-domains="fuelsteps.com,www.fuelsteps.com"></script>'
 
 
 def images():
