@@ -180,7 +180,7 @@ def page(code):
 <body>
 
 <header><div class="wrap">
-  <img src="{up}{WEB}icon-192.png" alt="" width="38" height="38"><b>FuelSteps</b>
+  <a class="brand" href="#" aria-label="FuelSteps"><img src="{up}{WEB}icon-192.png" alt="" width="38" height="38"><b>FuelSteps</b></a>
   <nav class="langs" aria-label="Language">{langs}</nav>
   <a class="btn ghost" href="plan/">{t["plan_nav"]}</a>
   <a class="btn ghost" href="{donate}" data-donate>{t["nav_donate"]}</a>

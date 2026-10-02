@@ -1,5 +1,6 @@
 :root { --amber: #FFAA00; --amber-dark: #945e00; --blue: #3377DD; --ink: #15171a; --muted: #4a4d52; --paper: #f6f3ec; }
 * { box-sizing: border-box; margin: 0; }
+html { scroll-behavior: smooth; }
 body { font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; color: var(--ink);
        background: var(--paper); line-height: 1.5; }
 a { color: var(--blue); }
