@@ -3,8 +3,11 @@
 Landing page for [FuelSteps](https://fuelsteps.com/), a free Garmin Connect IQ data field for fuel reminders during runs. Static HTML, built and served by GitHub Pages (GitHub Actions).
 
 - Texts: `i18n/<lang>.json` (en, nl, de, fr, es, it); all files have the same keys
-- Build: `python build.py` (needs Pillow: `pip install pillow`) → `index.html` (en), `<lang>/index.html`, WebP images and icons in `img/web/`, `manifest.webmanifest`, `404.html`, `sitemap.xml`, `robots.txt`, `llms.txt`, `llms-full.txt`. These are generated and not in git: on every push to `gh-pages`, `.github/workflows/pages.yml` builds and publishes them. Locally, run `build.py` to preview.
-- SEO: canonical + hreflang per page, Open Graph, `SoftwareApplication`, `FAQPage` and `WebSite` JSON-LD, sitemap with language alternates, responsive WebP; IndexNow ping (Bing, Yandex, …) after every deploy (`python build.py indexnow`, key file at the root)
+- Pages: home (`/`, `/<lang>/`) and the plan builder (`/plan/`, `/<lang>/plan/`: `plan.js` + `plan-core.js`, settings format reference, Umami events)
+- Build: `python build.py` (needs Pillow: `pip install pillow`) → `index.html` (en), `<lang>/index.html`, `plan/index.html`, `<lang>/plan/index.html`, WebP images and icons in `img/web/`, `manifest.webmanifest`, `404.html`, `sitemap.xml`, `robots.txt`, `llms.txt`, `llms-full.txt`. These are generated and not in git: on every push to `gh-pages`, `.github/workflows/pages.yml` runs the tests, builds and publishes them. Locally, run `build.py` to preview.
+- Tests: `node --test` (Node 22; `plan-core.test.js` mirrors `ScheduleParser.mc` in the app repo)
+- Analytics: Umami Cloud (cookieless, no consent banner): page views, referrers, countries, UTM sources, and the builder events `plan_template`, `plan_copy`, `plan_copy_all` (no schedule contents)
+- SEO: canonical + hreflang per page, Open Graph, `SoftwareApplication`, `FAQPage`, `WebSite` and `WebPage` JSON-LD, sitemap with language alternates, responsive WebP; IndexNow ping (Bing, Yandex, …) after every deploy (`python build.py indexnow`, key file at the root)
 - Language: the home page sends first-time visitors to their browser language (nl, de, fr, es, it); a choice in the switcher is remembered (localStorage `fuelsteps-lang`) and always wins
 - Moving to another domain: change `BASE` in `build.py` and rebuild
 

@@ -59,8 +59,9 @@ DONATE_JS = """<script>
 })();
 </script>"""
 
-# Cloudflare Web Analytics: no cookies, no personal data, so no consent banner (JS snippet: DNS stays "DNS only")
-ANALYTICS = """<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "973a24375d1b4099a8a741239c7c7386"}'></script>"""
+# Umami Cloud: page views, referrers, countries and the builder events; cookieless, no personal data, so no consent banner
+UMAMI_ID = "458f80aa-006c-4354-9a7b-8bdda8850cbd"
+ANALYTICS = f'<script defer src="https://cloud.umami.is/script.js" data-website-id="{UMAMI_ID}"></script>'
 
 
 def images():
