@@ -107,6 +107,7 @@
   "plan_err_total_max": "Het schema wordt hier langer dan 100 km / 600 min.",
   "plan_err_carbs": "Koolhydraten: hele grammen, 0 tot 9999.",
   "plan_err_field_long": "Deze stap is langer dan 40 tekens; kort de tekst in.",
+  "plan_warn_text_long": "Lange tekst wordt op het horloge afgekapt; houd het op ongeveer 16 tekens.",
   "plan_warn_roundtrip": "Het laatste woord leest het horloge als grammen of cafeïne; zet het getal vooraan of kies een ander woord.",
   "plan_format_kicker": "Referentie",
   "plan_format_h2": "FuelSteps-instellingenformaat",

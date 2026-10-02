@@ -55,6 +55,15 @@ function stepInput(type, value, attrs, onChange) {
   return el("input", { type, value, ...attrs, oninput: (e) => { onChange(e.target); render(); } });
 }
 
+// repeat as a picker 1–30 (the watch limit): no typing, nothing to validate
+function repeatSelect(s) {
+  const sel = el("select", { "aria-label": S.col_repeat, onchange: (e) => { s.repeat = Number(e.target.value); render(); } });
+  for (let n = 1; n <= LIMITS.repeatMax; n++) sel.append(el("option", { value: n }, String(n)));
+  sel.value = String(Number.isInteger(s.repeat) && s.repeat >= 1 && s.repeat <= LIMITS.repeatMax ? s.repeat : 1);
+  if (sel.value !== String(s.repeat)) s.repeat = Number(sel.value);
+  return sel;
+}
+
 // move a step to another position, rebuild, and put focus back on its handle
 function moveStep(from, to) {
   if (to < 0 || to >= schedule.steps.length || to === from) return;
@@ -71,26 +80,30 @@ function startDrag(e, tr) {
   const body = $("plan-steps");
   const from = [...body.children].indexOf(tr);
   const handle = e.currentTarget;
-  handle.setPointerCapture(e.pointerId);
+  try { handle.setPointerCapture(e.pointerId); } catch (err) { /* keep going: the listeners below sit on the document */ }
   tr.classList.add("dragging");
+  document.body.classList.add("dragging"); // no text selection while a finger or mouse drags the row
   const move = (ev) => {
+    if (ev.pointerId !== e.pointerId) return;
     const rows = [...body.children];
     const over = rows.find((r) => r !== tr && ev.clientY >= r.getBoundingClientRect().top && ev.clientY <= r.getBoundingClientRect().bottom);
     if (!over) return;
     const before = ev.clientY < over.getBoundingClientRect().top + over.getBoundingClientRect().height / 2;
     body.insertBefore(tr, before ? over : over.nextSibling);
   };
-  const end = () => {
-    handle.removeEventListener("pointermove", move);
-    handle.removeEventListener("pointerup", end);
-    handle.removeEventListener("pointercancel", end);
+  const end = (ev) => {
+    if (ev.pointerId !== e.pointerId) return;
+    document.removeEventListener("pointermove", move);
+    document.removeEventListener("pointerup", end);
+    document.removeEventListener("pointercancel", end);
     tr.classList.remove("dragging");
+    document.body.classList.remove("dragging");
     const to = [...body.children].indexOf(tr);
     if (to !== from) moveStep(from, to); else render(true);
   };
-  handle.addEventListener("pointermove", move);
-  handle.addEventListener("pointerup", end);
-  handle.addEventListener("pointercancel", end);
+  document.addEventListener("pointermove", move);
+  document.addEventListener("pointerup", end);
+  document.addEventListener("pointercancel", end);
 }
 
 function renderSteps(v) {
@@ -106,10 +119,10 @@ function renderSteps(v) {
     handle.addEventListener("pointerdown", (e) => startDrag(e, tr));
     tr.append(
       el("td", { class: "handle" }, handle),
-      el("td", { class: "rep", "data-label": S.col_repeat }, stepInput("number", s.repeat, { min: 1, max: LIMITS.repeatMax, step: 1, "aria-label": S.col_repeat }, (t) => { s.repeat = t.valueAsNumber; })),
+      el("td", { class: "rep", "data-label": S.col_repeat }, repeatSelect(s)),
       el("td", { class: "size", "data-label": S.col_size + " (" + unit + ")" }, stepInput("number", s.size, { min: 0, max: lim.max, step: lim.step, "aria-label": S.col_size + " (" + unit + ")" }, (t) => { s.size = t.valueAsNumber; })),
       el("td", { class: "text", "data-label": S.col_text }, stepInput("text", s.text, { maxlength: LIMITS.fieldMax, "aria-label": S.col_text }, (t) => { s.text = t.value; })),
-      el("td", { class: "carbs", "data-label": S.col_carbs }, stepInput("number", s.carbs, { min: 0, max: LIMITS.carbsMax, step: 1, "aria-label": S.col_carbs }, (t) => { s.carbs = t.valueAsNumber; })),
+      el("td", { class: "carbs", "data-label": S.col_carbs }, stepInput("number", s.carbs || "", { min: 0, max: LIMITS.carbsMax, step: 1, placeholder: "0", "aria-label": S.col_carbs }, (t) => { s.carbs = Number.isNaN(t.valueAsNumber) ? 0 : t.valueAsNumber; })),
       el("td", { class: "caf", "data-label": S.col_caf }, el("input", { type: "checkbox", checked: s.caf, "aria-label": S.col_caf, onchange: (e) => { s.caf = e.target.checked; render(); } })),
       el("td", { class: "del" }, el("button", { class: "icon-btn", type: "button", title: S.delete, "aria-label": S.delete, onclick: () => { schedule.steps.splice(i, 1); render(true); } }, "✕")));
     body.append(tr);

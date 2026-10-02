@@ -171,3 +171,9 @@ test("moments and fields ignore steps the watch would reject (unbounded repeat, 
   assert.equal(moments(sched("km", [step(5, 1.5, "Gel", 25, false)])).rows.length, 0);
   assert.equal(formatStep(step(NaN, 1, "Gel", 25, false)), "? Gel 25"); // shown while a field is empty, never a valid line
 });
+
+test("validate: warns when the text is too long to read on the watch", () => {
+  const v = validate(sched("km", [step(5, 1, "Gel number 3 is great", 25, false), step(5, 1, "Peanut butter 1", 25, false), step(5, 1, "Gel", 25, false)]));
+  assert.deepEqual(v.warnings, ["text_long", null, null]); // 21 chars warns, 15 does not
+  assert.equal(v.ok, true);
+});

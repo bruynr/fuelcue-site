@@ -5,6 +5,7 @@ export const LIMITS = {
   km: { min: 0.5, max: 100, step: 0.5 },
   min: { min: 5, max: 600, step: 5 },
   repeatMax: 30, nameMax: 16, fieldMax: 40, maxSteps: 8, carbsMax: 9999,
+  textAdvice: 16, // longer labels are cut off on the watch (alert and field draw the label in one line)
 };
 export const DEFAULT_TEXT = "Gel";
 
@@ -112,6 +113,7 @@ export function validate(schedule) {
       const back = parseStepText(formatStep(s));
       // the watch would read the text differently (last word eaten as carbs, or as the caf flag)
       if (!back || back.text !== normText(s.text) || back.carbs !== s.carbs || back.caf !== !!s.caf) warn = "roundtrip";
+      else if (normText(s.text).length > LIMITS.textAdvice) warn = "text_long";
     }
     warnings.push(warn);
   });

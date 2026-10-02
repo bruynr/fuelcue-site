@@ -107,6 +107,7 @@
   "plan_err_total_max": "Aquí el plan supera los 100 km / 600 min.",
   "plan_err_carbs": "Carbohidratos: gramos enteros, de 0 a 9999.",
   "plan_err_field_long": "Este paso supera los 40 caracteres; acorta el texto.",
+  "plan_warn_text_long": "El texto largo se corta en el reloj; mantenlo en unos 16 caracteres.",
   "plan_warn_roundtrip": "El reloj lee la última palabra como gramos o cafeína; pon el número delante o cambia la palabra.",
   "plan_format_kicker": "Referencia",
   "plan_format_h2": "Formato de ajustes de FuelSteps",

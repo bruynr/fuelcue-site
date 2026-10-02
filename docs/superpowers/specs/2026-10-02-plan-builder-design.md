@@ -49,7 +49,7 @@ Layout (two columns on desktop, stacked on mobile):
 **Left, input**
 - Name (text, max 16), Unit (segmented km / min).
 - Template select: "Gel 5 km" (`3x5 Gel 25 caf`), "Marathon 7 km" (`0 Gel 25`, `7 Gel 25`, `7 Dextro 15`, `7 Gel CAF 25 caf`, `2x7 Gel 25`), "Every 30 min" (time, `6x30 Gel 25`). Picking a template replaces the current steps (confirm when steps exist).
-- Step rows (max 8): repeat (number 1–30, default 1), size (number, step 0.5 or 5), text (free), carbs (number, g), caffeine (checkbox), a drag handle to reorder (pointer drag on mouse/touch, arrow keys on the keyboard), delete. On narrow screens a row stacks into two lines (text + delete, then repeat/size/carbs/caffeine with small labels) instead of scrolling sideways. "Add step" button, disabled at 8.
+- Step rows (max 8): repeat (picker 1–30, default 1), size (number, step 0.5 or 5), text (free; a warning above 16 characters, longer labels are cut off on the watch), carbs (number, g; empty counts as 0), caffeine (checkbox), a drag handle to reorder (pointer drag on mouse/touch, arrow keys on the keyboard), delete. On narrow screens a row stacks into two lines (text + delete, then repeat/size/carbs/caffeine with small labels) instead of scrolling sideways. "Add step" button, disabled at 8.
 - Live validation per row with the same rules as the watch, messages from i18n: below minimum, total above maximum, 0 only in step 1 without repeat, field longer than 40 characters, name longer than 16; hint when the last word of the text is a number.
 
 **Right, output**

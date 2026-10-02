@@ -107,6 +107,7 @@
   "plan_err_total_max": "Der Plan wird hier länger als 100 km / 600 min.",
   "plan_err_carbs": "Kohlenhydrate: ganze Gramm, 0 bis 9999.",
   "plan_err_field_long": "Dieser Schritt ist länger als 40 Zeichen; kürze den Text.",
+  "plan_warn_text_long": "Langer Text wird auf der Uhr abgeschnitten; bleib bei etwa 16 Zeichen.",
   "plan_warn_roundtrip": "Das letzte Wort liest die Uhr als Gramm oder Koffein; setze die Zahl nach vorn oder wähle ein anderes Wort.",
   "plan_format_kicker": "Referenz",
   "plan_format_h2": "FuelSteps-Einstellungsformat",

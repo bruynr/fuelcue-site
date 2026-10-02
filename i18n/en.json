@@ -107,6 +107,7 @@
   "plan_err_total_max": "The schedule is longer than 100 km / 600 min here.",
   "plan_err_carbs": "Carbs: whole grams, 0 to 9999.",
   "plan_err_field_long": "This step is longer than 40 characters; shorten the text.",
+  "plan_warn_text_long": "Long text is cut off on the watch; keep it to about 16 characters.",
   "plan_warn_roundtrip": "The last word reads as grams or caffeine on the watch; put the number first or change the word.",
   "plan_format_kicker": "Reference",
   "plan_format_h2": "FuelSteps settings format",
