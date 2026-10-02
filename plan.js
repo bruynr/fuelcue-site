@@ -74,13 +74,16 @@ function moveStep(from, to) {
 }
 
 // drag a row by its handle (mouse, touch, pen); while dragging only the DOM rows move, the schedule changes on release
-function startDrag(e, tr) {
+const GRIP_ICON = '<svg viewBox="0 0 14 22" aria-hidden="true"><circle cx="4" cy="4" r="2"/><circle cx="10" cy="4" r="2"/><circle cx="4" cy="11" r="2"/><circle cx="10" cy="11" r="2"/><circle cx="4" cy="18" r="2"/><circle cx="10" cy="18" r="2"/></svg>';
+
+function startDrag(e, tr, handle) {
   if (e.button !== 0 && e.pointerType === "mouse") return;
   e.preventDefault();
   const body = $("plan-steps");
   const from = [...body.children].indexOf(tr);
-  const handle = e.currentTarget;
   try { handle.setPointerCapture(e.pointerId); } catch (err) { /* keep going: the listeners below sit on the document */ }
+  const stopScroll = (ev) => ev.preventDefault(); // touch fallback when touch-action is ignored
+  document.addEventListener("touchmove", stopScroll, { passive: false });
   tr.classList.add("dragging");
   document.body.classList.add("dragging"); // no text selection while a finger or mouse drags the row
   const move = (ev) => {
@@ -96,6 +99,7 @@ function startDrag(e, tr) {
     document.removeEventListener("pointermove", move);
     document.removeEventListener("pointerup", end);
     document.removeEventListener("pointercancel", end);
+    document.removeEventListener("touchmove", stopScroll);
     tr.classList.remove("dragging");
     document.body.classList.remove("dragging");
     const to = [...body.children].indexOf(tr);
@@ -115,10 +119,12 @@ function renderSteps(v) {
     const bad = v.steps[i] !== null;
     const tr = el("tr", { class: bad ? "bad" : "" });
     const handle = el("button", { class: "grip", type: "button", title: S.drag, "aria-label": S.drag,
-      onkeydown: (e) => { if (e.key === "ArrowUp") { e.preventDefault(); moveStep(i, i - 1); } if (e.key === "ArrowDown") { e.preventDefault(); moveStep(i, i + 1); } } }, "⋮⋮");
-    handle.addEventListener("pointerdown", (e) => startDrag(e, tr));
+      onkeydown: (e) => { if (e.key === "ArrowUp") { e.preventDefault(); moveStep(i, i - 1); } if (e.key === "ArrowDown") { e.preventDefault(); moveStep(i, i + 1); } } });
+    handle.innerHTML = GRIP_ICON; // static SVG, no user content
+    const handleCell = el("td", { class: "handle" }, handle);
+    handleCell.addEventListener("pointerdown", (e) => startDrag(e, tr, handle)); // the whole cell is the touch target
     tr.append(
-      el("td", { class: "handle" }, handle),
+      handleCell,
       el("td", { class: "rep", "data-label": S.col_repeat }, repeatSelect(s)),
       el("td", { class: "size", "data-label": S.col_size + " (" + unit + ")" }, stepInput("number", s.size, { min: 0, max: lim.max, step: lim.step, "aria-label": S.col_size + " (" + unit + ")" }, (t) => { s.size = t.valueAsNumber; })),
       el("td", { class: "text", "data-label": S.col_text }, stepInput("text", s.text, { maxlength: LIMITS.fieldMax, "aria-label": S.col_text }, (t) => { s.text = t.value; })),
