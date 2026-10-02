@@ -56,11 +56,21 @@ DONATE_JS = """<script>
   });
   o.addEventListener("click", function (e) { if (e.target === o || e.target.closest(".overlay-close")) o.hidden = true; });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") o.hidden = true; });
+  // Umami events (no personal data): which donation provider gets clicked, which FAQ gets opened
+  var lang = document.documentElement.lang;
+  var track = function (name, data) { if (typeof umami !== "undefined") { data.lang = lang; umami.track(name, data); } };
+  o.querySelectorAll("a[data-provider]").forEach(function (a) {
+    a.addEventListener("click", function () { track("donate_click", { provider: a.dataset.provider }); });
+  });
+  document.querySelectorAll(".faq details").forEach(function (d, i) {
+    d.addEventListener("toggle", function () { if (d.open) track("faq_open", { q: i + 1 }); });
+  });
 })();
 </script>"""
 
-# Cloudflare Web Analytics: no cookies, no personal data, so no consent banner (JS snippet: DNS stays "DNS only")
-ANALYTICS = """<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "973a24375d1b4099a8a741239c7c7386"}'></script>"""
+# Umami Cloud: page views, referrers, countries and the builder events; cookieless, no personal data, so no consent banner
+UMAMI_ID = "458f80aa-006c-4354-9a7b-8bdda8850cbd"
+ANALYTICS = f'<script defer src="https://cloud.umami.is/script.js" data-website-id="{UMAMI_ID}" data-domains="fuelsteps.com,www.fuelsteps.com"></script>'
 
 
 def images():
@@ -116,7 +126,7 @@ def page(code):
         donates.reverse()  # bunq (iDEAL/WERO) on top only for Dutch visitors
     donate = donates[0][0]  # no-JS fallback for the trigger links
     donate_plain = " · ".join(u for u, _ in donates)
-    donate_btns = "".join(f'\n    <a class="btn {cls}" href="{u}">{esc(label)}</a>' for (u, label), cls in zip(donates, ("amber", "dark")))
+    donate_btns = "".join(f'\n    <a class="btn {cls}" href="{u}" data-provider="{"bunq" if u == DONATE_BUNQ else "paypal"}">{esc(label)}</a>' for (u, label), cls in zip(donates, ("amber", "dark")))
     alternates = "\n".join(f'<link rel="alternate" hreflang="{c}" href="{BASE + path(c)}">' for c in ORDER)
     langs = " ".join(
         f'<a href="{up}{path(c) or "./"}" hreflang="{c}" lang="{c}"{" aria-current=\"page\"" if c == code else ""}>{T[c]["label"]}</a>'
@@ -179,8 +189,9 @@ def page(code):
 <body>
 
 <header><div class="wrap">
-  <img src="{up}{WEB}icon-192.png" alt="" width="38" height="38"><b>FuelSteps</b>
+  <a class="brand" href="#" aria-label="FuelSteps"><img src="{up}{WEB}icon-192.png" alt="" width="38" height="38"><b>Fuel<em>Steps</em></b></a>
   <nav class="langs" aria-label="Language">{langs}</nav>
+  <a class="btn ghost" href="plan/">{t["plan_nav"]}</a>
   <a class="btn ghost" href="{donate}" data-donate>{t["nav_donate"]}</a>
   <span class="btn soon">{t["nav_soon"]}</span>
 </div></header>
@@ -192,6 +203,7 @@ def page(code):
     <h1>{t["hero_h1"]}</h1>
     <p class="lead">{t["hero_lead"]}</p>
     <div class="ctas">
+      <a class="btn dark" href="plan/">{t["plan_cta"]}</a>
       <span class="btn soon">{t["hero_soon"]}</span>
       <a class="btn amber" href="{donate}" data-donate>{t["hero_gel"]}</a>
     </div>
@@ -288,7 +300,8 @@ def page(code):
 <div class="overlay" id="donate-overlay" hidden>
   <div class="overlay-box" role="dialog" aria-modal="true" aria-labelledby="donate-title">
     <button class="overlay-close" aria-label="{esc(t["donate_close"])}">✕</button>
-    <h3 id="donate-title">{esc(t["donate_title"])}</h3>{donate_btns}
+    <h3 id="donate-title">{esc(t["donate_title"])}</h3>
+    <p class="donate-text">{esc(t["donate_text"])}</p>{donate_btns}
   </div>
 </div>
 
@@ -299,14 +312,141 @@ def page(code):
 """
 
 
+# the plan builder: /plan/ (en) and /<lang>/plan/; UI strings go to plan.js through the #plan-i18n JSON block
+def plan(code):
+    t = T[code]
+    up = "../" if code == "en" else "../../"
+    url = f"{BASE}{path(code)}plan/"
+    alternates = "\n".join(f'<link rel="alternate" hreflang="{c}" href="{BASE}{path(c)}plan/">' for c in ORDER)
+    langs = " ".join(
+        f'<a href="{up}{path(c)}plan/" hreflang="{c}" lang="{c}"{" aria-current=\"page\"" if c == code else ""}>{T[c]["label"]}</a>'
+        for c in ORDER)
+    ui = {k[5:]: v for k, v in t.items() if k.startswith("plan_") and not isinstance(v, list) and k not in ("plan_title", "plan_desc", "plan_h1", "plan_lead")}
+    ui["tpl"] = {tid: t[f"plan_tpl_{tid}"] for tid in ("gel5", "marathon7", "time30")}
+    webpage = {"@context": "https://schema.org", "@type": "WebPage", "name": t["plan_json_ld_name"], "description": t["plan_desc"],
+               "url": url, "inLanguage": code, "isPartOf": {"@type": "WebSite", "name": "FuelSteps", "url": BASE}}
+    li = lambda items: "".join(f"<li>{i}</li>" for i in items)
+    examples = "".join(f"<tr><td><code>{esc(c)}</code></td><td>{esc(d)}</td></tr>" for c, d in t["plan_format_examples"])
+    tpl_opts = "".join(f'<option value="{tid}">{esc(t[f"plan_tpl_{tid}"])}</option>' for tid in ("gel5", "marathon7", "time30"))
+    home = f"{up}{path(code) or './'}"
+    return f"""<!doctype html>
+<html lang="{code}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{esc(t["plan_title"])}</title>
+<meta name="description" content="{esc(t["plan_desc"])}">
+<link rel="canonical" href="{url}">
+{alternates}
+<link rel="alternate" hreflang="x-default" href="{BASE}plan/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FuelSteps">
+<meta property="og:title" content="{esc(t["plan_json_ld_name"])}">
+<meta property="og:description" content="{esc(t["plan_desc"])}">
+<meta property="og:url" content="{url}">
+<meta property="og:image" content="{BASE}{WEB}og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="600">
+<meta property="og:locale" content="{t["locale"]}">
+<meta name="theme-color" content="#15171a">
+<link rel="icon" href="{up}{WEB}icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="{up}{WEB}icon-180.png">
+<link rel="manifest" href="{up}manifest.webmanifest">
+<link rel="stylesheet" href="{up}style.css">
+<script type="application/ld+json">
+{json.dumps(webpage, ensure_ascii=False, indent=1)}
+</script>
+{ANALYTICS}
+</head>
+<body>
+
+<header><div class="wrap">
+  <a class="brand" href="{home}"><img src="{up}{WEB}icon-192.png" alt="" width="38" height="38"><b>Fuel<em>Steps</em></b></a>
+  <nav class="langs" aria-label="Language">{langs}</nav>
+  <a class="btn ghost" href="{home}#donate">{t["nav_donate"]}</a>
+</div></header>
+
+<main>
+<section class="alt plan-hero"><div class="wrap">
+  <div class="kicker">{t["plan_kicker"]}</div>
+  <h1>{t["plan_h1"]}</h1>
+  <p class="lead">{t["plan_lead"]}</p>
+</div></section>
+
+<section class="builder"><div class="wrap">
+  <noscript><p class="lead">JavaScript is needed for the builder. The format reference below works without it.</p></noscript>
+  <div class="builder-grid">
+    <div class="builder-in">
+      <div class="field-row">
+        <label>{t["plan_name"]}<input id="plan-name" type="text" maxlength="16" autocomplete="off"></label>
+        <fieldset id="plan-unit"><legend>{t["plan_unit"]}</legend>
+          <label><input type="radio" name="unit" value="km"> {t["plan_unit_km"]} ({t["plan_km"]})</label>
+          <label><input type="radio" name="unit" value="min"> {t["plan_unit_min"]} ({t["plan_min"]})</label>
+        </fieldset>
+        <label>{t["plan_template"]}<select id="plan-template"><option value="">{t["plan_template_pick"]}</option><option value="empty">{t["plan_template_blank"]}</option>{tpl_opts}</select></label>
+      </div>
+      <h2 class="h3">{t["plan_steps_h2"]}</h2>
+      <table class="steps-table">
+        <thead><tr><th></th><th>{t["plan_col_repeat"]}</th><th>{t["plan_col_size"]}</th><th>{t["plan_col_text"]}</th><th>{t["plan_col_carbs"]}</th><th>{t["plan_col_caf"]}</th><th></th></tr></thead>
+        <tbody id="plan-steps"></tbody>
+      </table>
+      <button id="plan-add" class="btn dark" type="button">{t["plan_add"]}</button>
+      <ul id="plan-errors" class="errors"></ul>
+    </div>
+    <div class="builder-out">
+      <h2 class="h3">{t["plan_fields_h2"]}</h2>
+      <p class="hint">{t["plan_fields_lead"]}</p>
+      <ol id="plan-fields" class="fields"></ol>
+      <button id="plan-copy-all" class="btn amber" type="button">{t["plan_copy_all"]}</button>
+      <h2 class="h3">{t["plan_moments_h2"]}</h2>
+      <table class="moments-table">
+        <thead><tr><th>{t["plan_col_at"]}</th><th>{t["plan_col_text"]}</th><th>{t["plan_col_carbs"]}</th><th></th></tr></thead>
+        <tbody id="plan-moments"></tbody>
+      </table>
+      <p id="plan-totals" class="totals"></p>
+    </div>
+  </div>
+</div></section>
+
+<section class="alt" id="format"><div class="wrap format">
+  <div class="kicker">{t["plan_format_kicker"]}</div>
+  <h2>{t["plan_format_h2"]}</h2>
+  <p class="lead">{t["plan_format_lead"]}</p>
+  <ul class="format-list">{li(t["plan_format_li"])}</ul>
+  <h3>{t["plan_format_examples_h3"]}</h3>
+  <table class="examples"><tbody>{examples}</tbody></table>
+  <h3>{t["plan_format_worked_h3"]}</h3>
+  <p class="quote">{t["plan_format_worked_q"]}</p>
+  <p>{t["plan_format_worked_a"]}</p>
+  <h3 class="note-h">{t["plan_note_h3"]}</h3>
+  <p class="note">{t["plan_note_p"]}</p>
+</div></section>
+</main>
+
+<div class="stripe"></div>
+<footer><div class="wrap">
+  <span>FuelSteps · {t["footer_watches"]}</span>
+  <nav class="langs-foot" aria-label="Language">{langs}</nav>
+  <span>{t["not_affiliated"]}</span>
+</div></footer>
+
+<script type="application/json" id="plan-i18n">{json.dumps(ui, ensure_ascii=False)}</script>
+<script type="module" src="{up}plan.js"></script>
+{REMEMBER}
+</body>
+</html>
+"""
+
+
 def sitemap():
     today = date.today().isoformat()
-    alt = "".join(f'\n    <xhtml:link rel="alternate" hreflang="{c}" href="{BASE + path(c)}"/>' for c in ORDER)
-    alt += f'\n    <xhtml:link rel="alternate" hreflang="x-default" href="{BASE}"/>'
-    urls = "".join(f"\n  <url>\n    <loc>{BASE + path(c)}</loc>\n    <lastmod>{today}</lastmod>{alt}\n  </url>" for c in ORDER)
+    def entry(sub):
+        alt = "".join(f'\n    <xhtml:link rel="alternate" hreflang="{c}" href="{BASE}{path(c)}{sub}"/>' for c in ORDER)
+        alt += f'\n    <xhtml:link rel="alternate" hreflang="x-default" href="{BASE}{sub}"/>'
+        return "".join(f"\n  <url>\n    <loc>{BASE}{path(c)}{sub}</loc>\n    <lastmod>{today}</lastmod>{alt}\n  </url>" for c in ORDER)
     return ('<?xml version="1.0" encoding="UTF-8"?>\n'
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'
-            f"{urls}\n</urlset>\n")
+            f"{entry('')}{entry('plan/')}\n</urlset>\n")
 
 
 def llms():
@@ -321,12 +461,14 @@ def llms():
 - Price: free, no subscription, no ads, no account; donations: {PLAIN_DONATE}
 - Watches: round Garmin watches with Connect IQ 5.0+ (Forerunner 165–970, fēnix 7/8/9/E, epix Gen 2/Pro, Enduro 3, MARQ Gen 2, Venu 2/3/4, vívoactive 5/6)
 - Schedules: up to 5, each a chain of steps by distance (km) or time (min) with repeats; per step a name, grams of carbs and a caffeine mark
+- Settings format (Garmin Connect, per schedule: Name, Unit, Step 1–8): one step field = `[Nx] size [text] [carbs[g]] [caf]`, e.g. `3x5 Gel 25 caf`; unused fields `-`; full reference and plan builder: {BASE}plan/#format
 - Alert: vibration, tone and full screen, 30 s / 50 m before the planned moment by default
 - Data: planned carbs, carbs per hour, fuel and caffeine moments saved in the activity (Garmin Connect charts)
 - Languages: English, Dutch, German, French, Spanish, Italian
 
 ## Pages
 {pages}
+- [Plan builder and settings format]({BASE}plan/)
 - [Full text (English)]({BASE}llms-full.txt)
 
 ## FAQ
@@ -369,6 +511,25 @@ def not_found():
 """
 
 
+# the settings format reference as markdown (English), for llms-full.txt
+def format_section():
+    t = T["en"]
+    items = "\n".join(f"- {strip(i)}" for i in t["plan_format_li"])
+    examples = "\n".join(f"- `{c}`: {d}" for c, d in t["plan_format_examples"])
+    return f"""## {t["plan_format_h2"]}
+{strip(t["plan_format_lead"])} Plan builder: {BASE}plan/
+
+{items}
+
+### {t["plan_format_examples_h3"]}
+{examples}
+
+### {t["plan_format_worked_h3"]}
+{t["plan_format_worked_q"]}
+{strip(t["plan_format_worked_a"])}
+"""
+
+
 # the whole English page as plain markdown, for AI crawlers
 def llms_full():
     t = T["en"]
@@ -394,6 +555,7 @@ Example schedule ({t["card_title"]}):
 - 7 km: Gel CAF, 25 g, {t["tag_caf"]}
 - 2× 7 km: Gel, 25 g (Gel #1, Gel #2)
 
+{format_section()}
 ## {strip(t["alert_h2"])}
 {strip(t["alert_lead"])}
 
@@ -426,6 +588,10 @@ def main():
         out = ROOT / path(code) / "index.html"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(page(code), encoding="utf-8", newline="\n")
+    for code in ORDER:
+        out = ROOT / path(code) / "plan" / "index.html"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(plan(code), encoding="utf-8", newline="\n")
     (ROOT / "sitemap.xml").write_text(sitemap(), encoding="utf-8", newline="\n")
     (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {BASE}sitemap.xml\n", encoding="utf-8", newline="\n")
     (ROOT / "llms.txt").write_text(llms(), encoding="utf-8", newline="\n")
@@ -441,7 +607,7 @@ def indexnow():
     import urllib.request
     host = BASE.split("/")[2]
     body = {"host": host, "key": INDEXNOW_KEY, "keyLocation": f"{BASE}{INDEXNOW_KEY}.txt",
-            "urlList": [BASE + path(c) for c in ORDER]}
+            "urlList": [BASE + path(c) + sub for sub in ("", "plan/") for c in ORDER]}
     req = urllib.request.Request("https://api.indexnow.org/indexnow", data=json.dumps(body).encode(),
                                  headers={"Content-Type": "application/json; charset=utf-8"})
     with urllib.request.urlopen(req, timeout=30) as r:
