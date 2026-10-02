@@ -68,6 +68,16 @@ DONATE_JS = """<script>
 })();
 </script>"""
 
+# mobile only: the burger toggles the menu under the header; a tap on a link closes it
+MENU_JS = """<script>
+(function () {
+  var b = document.querySelector(".burger"), m = document.getElementById("menu");
+  if (!b || !m) return;
+  b.addEventListener("click", function () { m.hidden = !m.hidden; b.setAttribute("aria-expanded", String(!m.hidden)); });
+  m.addEventListener("click", function (e) { if (e.target.closest("a")) { m.hidden = true; b.setAttribute("aria-expanded", "false"); } });
+})();
+</script>"""
+
 # Umami Cloud: page views, referrers, countries and the builder events; cookieless, no personal data, so no consent banner
 UMAMI_ID = "458f80aa-006c-4354-9a7b-8bdda8850cbd"
 ANALYTICS = f'<script defer src="https://cloud.umami.is/script.js" data-website-id="{UMAMI_ID}" data-domains="fuelsteps.com,www.fuelsteps.com"></script>'
@@ -194,7 +204,14 @@ def page(code):
   <a class="btn ghost" href="plan/">{t["plan_nav"]}</a>
   <a class="btn ghost" href="{donate}" data-donate>{t["nav_donate"]}</a>
   <span class="btn soon">{t["nav_soon"]}</span>
-</div></header>
+  <button class="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg></button>
+</div>
+<div class="menu" id="menu" hidden>
+  <a href="plan/">{t["plan_nav"]}</a>
+  <a href="{donate}" data-donate>{t["nav_donate"]}</a>
+  <nav class="langs-menu" aria-label="Language">{langs}</nav>
+</div>
+</header>
 
 <main>
 <section class="alt"><div class="wrap split">
@@ -305,6 +322,7 @@ def page(code):
   </div>
 </div>
 
+{MENU_JS}
 {REMEMBER}
 {DONATE_JS}
 </body>
@@ -364,7 +382,13 @@ def plan(code):
   <a class="brand" href="{home}"><img src="{up}{WEB}icon-192.png" alt="" width="38" height="38"><b>Fuel<em>Steps</em></b></a>
   <nav class="langs" aria-label="Language">{langs}</nav>
   <a class="btn ghost" href="{home}#donate">{t["nav_donate"]}</a>
-</div></header>
+  <button class="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg></button>
+</div>
+<div class="menu" id="menu" hidden>
+  <a href="{home}#donate">{t["nav_donate"]}</a>
+  <nav class="langs-menu" aria-label="Language">{langs}</nav>
+</div>
+</header>
 
 <main>
 <section class="alt plan-hero"><div class="wrap">
@@ -432,6 +456,7 @@ def plan(code):
 
 <script type="application/json" id="plan-i18n">{json.dumps(ui, ensure_ascii=False)}</script>
 <script type="module" src="{up}plan.js"></script>
+{MENU_JS}
 {REMEMBER}
 </body>
 </html>

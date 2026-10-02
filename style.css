@@ -7,6 +7,14 @@ a { color: var(--blue); }
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 28px; }
 header { position: sticky; top: 0; z-index: 10; background: rgba(246, 243, 236, .92); backdrop-filter: blur(8px); border-bottom: 1px solid #e7e1d3; }
 header .wrap { display: flex; align-items: center; gap: 12px; height: 68px; }
+.burger { display: none; border: 0; background: none; color: var(--ink); padding: 8px; cursor: pointer; border-radius: 10px; }
+.burger svg { width: 26px; height: 26px; display: block; }
+.menu { border-top: 1px solid #e7e1d3; padding: 6px 28px 16px; }
+.menu[hidden] { display: none; }
+.menu a { display: block; padding: 13px 0; border-bottom: 1px solid #ece6d8; font-size: 18px; font-weight: 700; color: var(--ink); text-decoration: none; }
+.langs-menu { display: flex; flex-wrap: wrap; gap: 4px; padding-top: 14px; }
+.langs-menu a { display: inline-block; border: 0; padding: 8px 10px; font-size: 15px; font-weight: 700; color: #6b6558; border-radius: 8px; text-decoration: none; }
+.langs-menu a[aria-current] { color: var(--ink); background: #e7e1d3; }
 header img { width: 38px; height: 38px; }
 header b { font-size: 23px; letter-spacing: -.6px; font-weight: 800; flex: 1; }
 header b em { font-style: normal; color: var(--blue); }
@@ -52,7 +60,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 @media (max-width: 820px) {
   .split { grid-template-columns: 1fr; } .split.rev > :first-child { order: 0; }
   section { padding: 60px 0; } header .btn.soon { display: none; } header .langs { display: none; }
-  header .btn { padding: 9px 14px; font-size: 15px; }
+  header .wrap .btn { display: none; } .burger { display: block; }
   .langs-foot { display: flex; }
 }
 .langs { display: flex; gap: 4px; margin-right: 8px; }
