@@ -56,6 +56,15 @@ DONATE_JS = """<script>
   });
   o.addEventListener("click", function (e) { if (e.target === o || e.target.closest(".overlay-close")) o.hidden = true; });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") o.hidden = true; });
+  // Umami events (no personal data): which donation provider gets clicked, which FAQ gets opened
+  var lang = document.documentElement.lang;
+  var track = function (name, data) { if (typeof umami !== "undefined") { data.lang = lang; umami.track(name, data); } };
+  o.querySelectorAll("a[data-provider]").forEach(function (a) {
+    a.addEventListener("click", function () { track("donate_click", { provider: a.dataset.provider }); });
+  });
+  document.querySelectorAll(".faq details").forEach(function (d, i) {
+    d.addEventListener("toggle", function () { if (d.open) track("faq_open", { q: i + 1 }); });
+  });
 })();
 </script>"""
 
@@ -117,7 +126,7 @@ def page(code):
         donates.reverse()  # bunq (iDEAL/WERO) on top only for Dutch visitors
     donate = donates[0][0]  # no-JS fallback for the trigger links
     donate_plain = " · ".join(u for u, _ in donates)
-    donate_btns = "".join(f'\n    <a class="btn {cls}" href="{u}">{esc(label)}</a>' for (u, label), cls in zip(donates, ("amber", "dark")))
+    donate_btns = "".join(f'\n    <a class="btn {cls}" href="{u}" data-provider="{"bunq" if u == DONATE_BUNQ else "paypal"}">{esc(label)}</a>' for (u, label), cls in zip(donates, ("amber", "dark")))
     alternates = "\n".join(f'<link rel="alternate" hreflang="{c}" href="{BASE + path(c)}">' for c in ORDER)
     langs = " ".join(
         f'<a href="{up}{path(c) or "./"}" hreflang="{c}" lang="{c}"{" aria-current=\"page\"" if c == code else ""}>{T[c]["label"]}</a>'

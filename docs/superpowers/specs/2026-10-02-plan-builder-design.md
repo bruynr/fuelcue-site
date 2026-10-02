@@ -68,7 +68,9 @@ Layout (two columns on desktop, stacked on mobile):
 - Events only on the plan page, via `umami.track(name, data)` guarded by `typeof umami !== "undefined"`:
   - `plan_template` `{id}`
   - `plan_copy` `{field: "step1" … "step8", unit: "km" | "min", steps: n}`; every event also carries `lang` (page language)
-  - `plan_copy_all` `{unit, steps}`
+  - `plan_copy_all` `{unit, steps, moments, caf, total_g}`
+  - `plan_error` `{code}` once per code per visit
+  - home page: `donate_click` `{provider}`, `faq_open` `{q}`
 - No personal data, no schedule contents, no cookies; the privacy line in the footer stays valid ("no account, no cookies").
 
 ## 5. Testing and verification

@@ -143,7 +143,12 @@ function renderErrors(v) {
   if (schedule.steps.length === 0) ul.append(el("li", {}, S.err_no_steps));
   v.steps.forEach((e, i) => { if (e) ul.append(el("li", {}, fmt(S.field_step, { n: i + 1 }) + ": " + S["err_" + e])); });
   v.warnings.forEach((w, i) => { if (w) ul.append(el("li", { class: "warn" }, fmt(S.field_step, { n: i + 1 }) + ": " + S["warn_" + w])); });
+  // which validation problems people run into, once per code per visit (no field contents)
+  for (const code of new Set([v.name, ...v.steps, ...v.warnings].filter(Boolean))) {
+    if (!reportedErrors.has(code)) { reportedErrors.add(code); track("plan_error", { code }); }
+  }
 }
+const reportedErrors = new Set();
 
 // the 10 Garmin Connect fields; name and unit are typed/picked in the app, only the step lines get a copy button
 function fieldRows() {
@@ -220,7 +225,8 @@ $("plan-template").addEventListener("change", (e) => {
 $("plan-add").addEventListener("click", () => { schedule.steps.push(newStep()); render(); });
 $("plan-copy-all").addEventListener("click", (e) => {
   copyText(fieldRows().map((r) => `${r.label}: ${r.value}`).join("\n"), e.currentTarget);
-  track("plan_copy_all", { unit: schedule.unit, steps: schedule.steps.length });
+  const m = moments(schedule);
+  track("plan_copy_all", { unit: schedule.unit, steps: schedule.steps.length, moments: m.count, caf: m.cafCount, total_g: m.totalCarbs });
 });
 
 render();
